@@ -82,3 +82,35 @@ export function calculateSplit(
 function round2(n: number): number {
   return Math.round(n * 100) / 100
 }
+
+export interface ItemsReconcile {
+  itemsTotal: number        // Σ unit_price × quantity over all parsed items
+  foodSubtotal: number      // ค่าอาหาร read from the receipt footer
+  diff: number              // itemsTotal − foodSubtotal (>0 likely duplicate, <0 likely missing)
+  balanced: boolean         // |diff| within tolerance → item list trusted
+}
+
+/**
+ * Cross-check the parsed item list against the receipt's own ค่าอาหาร line.
+ *
+ * These are two independent figures: the sum of what we extracted vs. the
+ * subtotal the merchant printed. On a clean parse they match. A mismatch is a
+ * strong signal of a multi-image merge problem — a person/item counted twice
+ * (diff > 0) or dropped (diff < 0) — even when grand_total looks fine. This is
+ * exactly the case where two people order the same-priced item and a collapsed
+ * section can't be name-matched, so the row gets double-counted.
+ *
+ * foodSubtotal ≤ 0 means the footer wasn't read; there's nothing to compare to,
+ * so we report balanced and let the grand_total check be the safety net.
+ */
+export function reconcileItems(
+  items: { unit_price: number; quantity: number }[],
+  foodSubtotal: number,
+  tolerance = 0.5,
+): ItemsReconcile {
+  const itemsTotal = round2(items.reduce((s, i) => s + i.unit_price * i.quantity, 0))
+  const food = round2(foodSubtotal)
+  const diff = round2(itemsTotal - food)
+  const balanced = food <= 0 || Math.abs(diff) <= tolerance
+  return { itemsTotal, foodSubtotal: food, diff, balanced }
+}

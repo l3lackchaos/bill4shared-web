@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase-server'
 import { notFound, redirect } from 'next/navigation'
+import { reconcileItems } from '@/lib/bill'
 import ConfirmActions from './ConfirmActions'
 
 type Props = { params: Promise<{ id: string }> }
@@ -41,6 +42,10 @@ export default async function ConfirmPage({ params }: Props) {
 
   const hasGroups = personGroups.size > 0
 
+  // Cross-check: Σ items vs ค่าอาหาร from the footer. A mismatch flags a likely
+  // duplicate (diff > 0) or dropped (diff < 0) row from multi-image OCR merge.
+  const reconcile = reconcileItems(typedItems, Number(session.food_subtotal))
+
   function ItemLine({ item }: { item: ItemRow }) {
     return (
       <div className="flex justify-between items-center px-4 py-3">
@@ -62,6 +67,21 @@ export default async function ConfirmPage({ params }: Props) {
       </Link>
       <h1 className="text-xl font-bold text-gray-900 mb-1">ยืนยันรายการ</h1>
       <p className="text-sm text-gray-500 mb-4">ตรวจสอบรายการก่อนไปขั้นตอนถัดไป</p>
+
+      {!reconcile.balanced && (
+        <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm">
+          <p className="font-semibold text-yellow-800">
+            ⚠️ ยอดรายการไม่ตรงกับค่าอาหาร
+          </p>
+          <p className="text-yellow-700 mt-0.5">
+            รวมรายการได้ ฿{reconcile.itemsTotal.toFixed(2)} แต่บิลระบุค่าอาหาร ฿{reconcile.foodSubtotal.toFixed(2)}
+            {' '}({reconcile.diff > 0 ? `เกิน ฿${reconcile.diff.toFixed(2)} — อาจมีรายการซ้ำ` : `ขาด ฿${(-reconcile.diff).toFixed(2)} — อาจมีรายการตกหล่น`})
+          </p>
+          <p className="text-yellow-600 mt-1 text-xs">
+            ตรวจสอบรายการด้านล่าง แล้วอัปโหลดรูปใหม่หากจำเป็น
+          </p>
+        </div>
+      )}
 
       {hasGroups && isGroupOrder ? (
         <div className="space-y-3 mb-4">
@@ -114,28 +134,15 @@ export default async function ConfirmPage({ params }: Props) {
         </div>
       )}
 
-      <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 space-y-1.5 text-sm mb-6">
-        {session.food_subtotal > 0 && (
-          <div className="flex justify-between text-gray-600">
-            <span>ค่าอาหาร</span><span>฿{Number(session.food_subtotal).toFixed(2)}</span>
-          </div>
-        )}
-        {session.delivery_fee > 0 && (
-          <div className="flex justify-between text-gray-600">
-            <span>ค่าจัดส่ง</span><span>฿{Number(session.delivery_fee).toFixed(2)}</span>
-          </div>
-        )}
-        {session.total_discount > 0 && (
-          <div className="flex justify-between text-red-600">
-            <span>ส่วนลด</span><span>-฿{Number(session.total_discount).toFixed(2)}</span>
-          </div>
-        )}
-        <div className="flex justify-between font-semibold text-gray-900 pt-1 border-t border-gray-200">
-          <span>รวมทั้งหมด</span><span>฿{Number(session.grand_total).toFixed(2)}</span>
-        </div>
-      </div>
-
-      <ConfirmActions sessionId={id} billType={session.bill_type} />
+      <ConfirmActions
+        sessionId={id}
+        billType={session.bill_type}
+        foodSubtotal={Number(session.food_subtotal)}
+        deliveryFee={Number(session.delivery_fee)}
+        totalDiscount={Number(session.total_discount)}
+        grandTotal={Number(session.grand_total)}
+        splitMode={Number(session.split_mode)}
+      />
     </div>
   )
 }

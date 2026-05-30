@@ -41,24 +41,27 @@ export async function POST(req: Request, { params }: Params) {
   // Delete old items then insert fresh
   await db.from('items').delete().eq('session_id', id)
 
-  const itemsToInsert =
-    bill.bill_type === 'group_order'
-      ? bill.persons.flatMap(person =>
-          person.items.map(item => ({
-            session_id: id,
-            name: item.name,
-            unit_price: item.unit_price,
-            quantity: item.quantity,
-            pre_assigned_name: person.name,
-          })),
-        )
-      : bill.items.map(item => ({
-          session_id: id,
-          name: item.name,
-          unit_price: item.unit_price,
-          quantity: item.quantity,
-          pre_assigned_name: null as string | null,
-        }))
+  // Insert BOTH person-grouped items and any flat (orphan) items. A multi-image
+  // group_order can have a page OCR'd as physical → those items live in bill.items
+  // with no person. Keeping them as unassigned (rather than dropping) lets the user
+  // see and claim them instead of silently losing part of the bill.
+  const personItems = bill.persons.flatMap(person =>
+    person.items.map(item => ({
+      session_id: id,
+      name: item.name,
+      unit_price: item.unit_price,
+      quantity: item.quantity,
+      pre_assigned_name: person.name,
+    })),
+  )
+  const flatItems = bill.items.map(item => ({
+    session_id: id,
+    name: item.name,
+    unit_price: item.unit_price,
+    quantity: item.quantity,
+    pre_assigned_name: null as string | null,
+  }))
+  const itemsToInsert = [...personItems, ...flatItems]
 
   if (itemsToInsert.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

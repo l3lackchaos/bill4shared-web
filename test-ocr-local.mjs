@@ -63,16 +63,19 @@ function printBill(label, b) {
   console.log('food=%s delivery=%s discount=%s grand=%s', b.food_subtotal, b.delivery_fee, b.total_discount, b.grand_total)
 }
 
-// Inline merge (mirrors lib/ocr.ts mergeParsedBills)
+// Inline merge — MUST mirror lib/ocr.ts mergeParsedBills exactly.
+const ROLE_PREFIX = /\[[^\]]*\]/g
+function cleanPersonName(name) {
+  return name.replace(ROLE_PREFIX, '').replace(/\s+/g, ' ').trim()
+}
 function normalizeName(name) {
-  return name.normalize('NFC').replace(/[็-๎]/g, '').replace(/\s+/g, ' ').trim().toLowerCase()
+  return name.normalize('NFC').replace(ROLE_PREFIX, '').replace(/[็-๎]/g, '').replace(/\s+/g, ' ').trim().toLowerCase()
 }
 function normalizeItemKey(item) {
   return `${normalizeName(item.name)}|${item.unit_price}|${item.quantity}`
 }
 
 function merge(bills) {
-  if (bills.length === 1) return bills[0]
   const mergedPersons = new Map()
   const mergedItems = [], mergedItemKeys = new Set()
   for (const bill of bills) {
@@ -85,7 +88,7 @@ function merge(bills) {
           if (!ex.keys.has(key)) { ex.items.push(item); ex.keys.add(key) }
         }
       } else {
-        mergedPersons.set(personKey, { name: person.name, items: [...person.items], keys: new Set(person.items.map(normalizeItemKey)) })
+        mergedPersons.set(personKey, { name: cleanPersonName(person.name), items: [...person.items], keys: new Set(person.items.map(normalizeItemKey)) })
       }
     }
     for (const item of bill.items) {
@@ -97,25 +100,71 @@ function merge(bills) {
   const deliveryFee = Math.max(...bills.map(b => b.delivery_fee))
   const nonzero = bills.map(b => b.grand_total).filter(t => t > 0)
   const grandTotal = nonzero.length > 0 ? Math.min(...nonzero) : 0
-  const derivedDiscount = foodSubtotal + deliveryFee - grandTotal
+
+  const mergedPersonList = [...mergedPersons.values()].map(p => {
+    const realItems = p.items.filter(i => i.unit_price > 0 && i.name !== 'รายการ')
+    const finalItems = realItems.length > 0 ? realItems : p.items
+    return { name: p.name, items: finalItems, person_subtotal: finalItems.reduce((s,i)=>s+i.unit_price*i.quantity,0) }
+  })
+  const billType = mergedPersonList.length > 0 ? 'group_order' : mergedItems.length > 0 ? 'physical' : 'unknown'
+  const totalDiscount = grandTotal > 0 ? Math.round(Math.max(0, foodSubtotal + deliveryFee - grandTotal) * 100) / 100 : 0
+
   return {
-    bill_type: bills[0].bill_type,
-    persons: [...mergedPersons.values()].map(p => {
-      const realItems = p.items.filter(i => i.unit_price > 0)
-      const finalItems = realItems.length > 0 ? realItems : p.items
-      return { name: p.name, items: finalItems, person_subtotal: finalItems.reduce((s,i)=>s+i.unit_price*i.quantity,0) }
-    }),
+    bill_type: billType,
+    persons: mergedPersonList,
     items: mergedItems, food_subtotal: foodSubtotal, delivery_fee: deliveryFee,
-    total_discount: Math.round(Math.max(derivedDiscount, 0) * 100) / 100,
+    total_discount: totalDiscount,
     grand_total: grandTotal,
   }
 }
 
-const b1 = await parse('./bill-example/1/S__20037640_0.jpg')
-printBill('PAGE 1', b1)
+// reconcileItems — mirror of lib/bill.ts
+function reconcileItems(items, foodSubtotal, tolerance = 0.5) {
+  const round2 = n => Math.round(n * 100) / 100
+  const itemsTotal = round2(items.reduce((s, i) => s + i.unit_price * i.quantity, 0))
+  const food = round2(foodSubtotal)
+  const diff = round2(itemsTotal - food)
+  return { itemsTotal, foodSubtotal: food, diff, balanced: food <= 0 || Math.abs(diff) <= tolerance }
+}
 
-const b2 = await parse('./bill-example/1/S__20037641_0.jpg')
-printBill('PAGE 2', b2)
+// Verify against all example bills (each is a 2-page LINE MAN group order).
+// expectBalanced: do we expect Σ items to match the ค่าอาหาร footer after merge?
+//   bills 1 & 2 parse cleanly → balanced. bill 3 has a collapsed section whose
+//   name can't be matched across pages → a same-priced row double-counts, so the
+//   reconcile detector SHOULD flag it (balanced === false is the correct result).
+const BILLS = [
+  { label: '1', p1: './bill-example/1/S__20037640_0.jpg', p2: './bill-example/1/S__20037641_0.jpg', expectBalanced: true },
+  { label: '2', p1: './bill-example/2/S__20037642_0.jpg', p2: './bill-example/2/S__20037645_0.jpg', expectBalanced: true },
+  { label: '3', p1: './bill-example/3/S__20439049_0.jpg', p2: './bill-example/3/S__20439050_0.jpg', expectBalanced: false },
+]
 
-const merged = merge([b1, b2])
-printBill('MERGED', merged)
+let failures = 0
+for (const { label, p1, p2, expectBalanced } of BILLS) {
+  console.log(`\n############ BILL ${label} ############`)
+  const b1 = await parse(p1); printBill('PAGE 1', b1)
+  const b2 = await parse(p2); printBill('PAGE 2', b2)
+  const merged = merge([b1, b2]); printBill('MERGED', merged)
+
+  const allItems = merged.persons.flatMap(p => p.items).concat(merged.items)
+  const rec = reconcileItems(allItems, merged.food_subtotal)
+  const dupNames = merged.persons.map(p => p.name)
+  const hasDup = new Set(dupNames).size !== dupNames.length
+
+  // Assertions:
+  //  - discount must be derived (never silently 0 when a grand_total was read)
+  //  - no duplicate person names after merge (dedup + role-prefix cleaning work)
+  //  - reconcile.balanced matches expectation
+  const checks = [
+    ['discount derived', merged.grand_total === 0 || merged.total_discount > 0],
+    ['no dup persons', !hasDup],
+    [`reconcile balanced === ${expectBalanced}`, rec.balanced === expectBalanced],
+  ]
+  console.log(`RECONCILE: Σitems=${rec.itemsTotal} food=${rec.foodSubtotal} diff=${rec.diff} balanced=${rec.balanced}`)
+  for (const [name, ok] of checks) {
+    console.log(`  ${ok ? '✅' : '❌'} ${name}`)
+    if (!ok) failures++
+  }
+}
+
+console.log(`\n${failures === 0 ? '✅ ALL CHECKS PASSED' : `❌ ${failures} CHECK(S) FAILED`}`)
+process.exit(failures === 0 ? 0 : 1)

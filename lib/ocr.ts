@@ -90,10 +90,19 @@ export async function parseReceiptImage(
 // Port of Python _normalize() — must match exactly to avoid dedup failures on multi-page OCR
 // Strip Thai tone marks ็่้๊๋์ํ๎ (็–๎): OCR often misreads these across pages
 const THAI_TONE_MARKS = /[็-๎]/g
+// LINE MAN / Shopee tag group members with a role prefix like "[คุณ]" or
+// "[เจ้าของกลุ่ม]". It is noise: it must not affect dedup, and shouldn't be shown.
+const ROLE_PREFIX = /\[[^\]]*\]/g
+
+// Display name: drop the role tag but keep the rest (emoji/decoration) as the user set it.
+function cleanPersonName(name: string): string {
+  return name.replace(ROLE_PREFIX, '').replace(/\s+/g, ' ').trim()
+}
 
 function normalizeName(name: string): string {
   return name
     .normalize('NFC')          // Unicode NFC — same as Python unicodedata.normalize("NFC")
+    .replace(ROLE_PREFIX, '')    // strip "[คุณ]"/"[เจ้าของกลุ่ม]" so the same person merges across pages
     .replace(THAI_TONE_MARKS, '') // strip tone marks so OCR errors don't break dedup
     .replace(/\s+/g, ' ')        // collapse whitespace
     .trim()
@@ -105,8 +114,8 @@ function normalizeItemKey(item: ParsedItem): string {
 }
 
 export function mergeParsedBills(bills: ParsedBill[]): ParsedBill {
-  if (bills.length === 1) return bills[0]
-
+  // Note: run the full pipeline even for a single bill so person-name cleaning,
+  // placeholder removal and content-based bill_type apply consistently.
   const mergedPersons = new Map<string, { name: string; items: ParsedItem[]; keys: Set<string>; person_subtotal: number }>()
   const mergedItems: ParsedItem[] = []
   const mergedItemKeys = new Set<string>()
@@ -129,7 +138,7 @@ export function mergeParsedBills(bills: ParsedBill[]): ParsedBill {
         existing.person_subtotal = existing.items.reduce((s, i) => s + i.unit_price * i.quantity, 0)
       } else {
         mergedPersons.set(personKey, {
-          name: person.name,           // keep original display name from first page
+          name: cleanPersonName(person.name), // display name without the role tag
           items: [...person.items],
           keys: new Set(person.items.map(normalizeItemKey)),
           person_subtotal: person.person_subtotal,
@@ -153,22 +162,42 @@ export function mergeParsedBills(bills: ParsedBill[]): ParsedBill {
   const nonzeroTotals = bills.map(b => b.grand_total).filter(t => t > 0)
   const grandTotal = nonzeroTotals.length > 0 ? Math.min(...nonzeroTotals) : 0
 
+  const mergedPersonList = [...mergedPersons.values()].map(p => {
+    // Prefer real itemized lines over placeholders:
+    //  - zero-price items from cut-off pages
+    //  - collapsed-section placeholder named "รายการ" (its unit_price = the person
+    //    total, so a price filter alone won't catch it → would double-count when a
+    //    later page reveals the real items for the same person)
+    const realItems = p.items.filter(i => i.unit_price > 0 && i.name !== 'รายการ')
+    const finalItems = realItems.length > 0 ? realItems : p.items
+    return {
+      name: p.name,
+      items: finalItems,
+      person_subtotal: finalItems.reduce((s, i) => s + i.unit_price * i.quantity, 0),
+    }
+  })
+
+  // bill_type must reflect the MERGED content, not just the first page. OCR often
+  // classifies page 1 as group_order (person headers visible) and page 2 (scrolled,
+  // no headers) as physical — taking bills[0] would drop one side's data downstream.
+  const billType: ParsedBill['bill_type'] =
+    mergedPersonList.length > 0 ? 'group_order' : mergedItems.length > 0 ? 'physical' : 'unknown'
+
+  // Derive discount the same way as single-image parseReceiptImage — never leave it 0.
+  // food_subtotal/delivery come from the page that showed the footer (max), grand_total
+  // from the after-discount summary (min nonzero), so the difference is the real discount.
+  // Guard: with no grand_total read (grandTotal === 0) there is nothing to derive from —
+  // food+delivery would masquerade as a 100% discount, so keep it 0.
+  const totalDiscount =
+    grandTotal > 0 ? Math.round(Math.max(0, foodSubtotal + deliveryFee - grandTotal) * 100) / 100 : 0
+
   return {
-    bill_type: bills[0].bill_type,
-    persons: [...mergedPersons.values()].map(p => {
-      // Drop zero-price placeholder items when real items exist (from cut-off pages)
-      const realItems = p.items.filter(i => i.unit_price > 0)
-      const finalItems = realItems.length > 0 ? realItems : p.items
-      return {
-        name: p.name,
-        items: finalItems,
-        person_subtotal: finalItems.reduce((s, i) => s + i.unit_price * i.quantity, 0),
-      }
-    }),
+    bill_type: billType,
+    persons: mergedPersonList,
     items: mergedItems,
     food_subtotal: foodSubtotal,
     delivery_fee: deliveryFee,
-    total_discount: 0,
+    total_discount: totalDiscount,
     grand_total: grandTotal,
     has_vat: hasVat,
     vat_amount: vatAmount,
