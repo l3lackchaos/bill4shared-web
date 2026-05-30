@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Pin the workspace root to this project. Without it, Turbopack walks up and
+  // picks the parent D:\_projects\package-lock.json as root (local-only warning);
+  // harmless on Railway but keeps local + CI builds consistent.
+  turbopack: {
+    root: __dirname,
+  },
 };
 
 export default nextConfig;
