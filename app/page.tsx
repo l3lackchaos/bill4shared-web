@@ -2,6 +2,10 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase-server'
 import type { BillSession } from '@/types'
 
+// Render per-request: this page lists live sessions from Supabase, so it must
+// not be prerendered at build time (env vars aren't present then → build fails).
+export const dynamic = 'force-dynamic'
+
 const STATUS_LABEL: Record<string, string> = {
   collecting: 'กำลังรับรูป',
   confirming: 'รอยืนยัน',
