@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
+/*
+ * Bill4Shared is a light-themed app: every surface is built on white cards over
+ * a gray-50 canvas with indigo accents. We intentionally LOCK the app to a light
+ * color scheme. The previous prefers-color-scheme:dark block flipped the body
+ * background to near-black while components kept hardcoded light colors
+ * (bg-white cards, text-gray-900 headings) — leaving dark-on-dark text that was
+ * unreadable. Forcing light keeps contrast correct everywhere.
+ */
+
 :root {
-  --background: #ffffff;
+  --background: #f9fafb; /* gray-50 — matches the canvas the layout expects */
   --foreground: #171717;
+  color-scheme: light; /* keep form controls, scrollbars, etc. in light mode */
 }
 
 @theme inline {
@@ -12,15 +22,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
