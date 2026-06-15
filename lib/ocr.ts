@@ -26,6 +26,27 @@ Rules:
 - delivery_fee = ค่าจัดส่ง NET as POSITIVE number (after any delivery discount applied)
 - total_discount = food_subtotal + delivery_fee - grand_total (derive from grand total to capture hidden discounts)
 - All prices as numbers only, no ฿ symbol
+
+Physical / paper receipt rules (POS, restaurant, McDonald's, Café, etc.):
+- grand_total = the amount ACTUALLY PAID. Use the line that equals the payment/
+  tender (Total, ยอดชำระ, Eat-In Total, Amount Paid, or the card/cash line such
+  as Visa/Cash). It is usually the LARGEST money figure on the receipt.
+- VAT IS NOT A DISCOUNT. On "VAT included / incl Tax" receipts the price already
+  contains tax. Lines like "Net Total" / "ยอดก่อนภาษี" (pre-tax) and
+  "Tax Included" / "ภาษี 7%" are a breakdown of the SAME total — never subtract
+  them. Set has_vat=true and vat_amount=the tax figure, but do NOT let the
+  pre-tax (Net) figure become grand_total, or a phantom discount appears.
+  Example: Subtotal 294, Net Total 274.77, Tax Included 19.23, Visa 294
+           => grand_total=294, food_subtotal=294, vat_amount=19.23, total_discount=0.
+- food_subtotal = sum of item line totals (the Subtotal line before any real
+  discount). If the only difference from grand_total is tax, they are equal.
+- Only count a real discount line (ส่วนลด / Discount / Promotion / coupon) toward
+  a lower grand_total. Rounding Adjustment is not a discount.
+- Item amounts: the printed price column is the LINE total. If quantity > 1,
+  unit_price = line total / quantity. Merge an item that wraps onto a second line
+  (e.g. "3 pcs. McPatongo with 1" + "Condensed milk Dip") into ONE item name.
+  Skip non-item lines (Subtotal, Total, Tax, Rounding, Change, card info).
+
 - Collapsed/hidden person sections (section header visible but items hidden): still include that person with one item named "รายการ" and unit_price = the visible person total, quantity 1
 - Receipt may be cut off / partially visible: parse what is visible, set unknown totals to 0
 - CRITICAL: respond with ONLY the JSON object. No explanations, no text before or after, no markdown fences`

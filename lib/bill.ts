@@ -1,4 +1,5 @@
 import type { BillItem, ItemAssignment, PersonTotal, SplitResult, SplitMode } from '@/types'
+import { THAI_HELP_RATE, THAI_HELP_CAP } from '@/types'
 
 interface SessionData {
   id: string
@@ -7,6 +8,19 @@ interface SessionData {
   delivery_fee: number
   total_discount: number
   grand_total: number
+  thai_help_enabled?: boolean
+  thai_help_balance?: number // remaining subsidy balance the user entered for this bill
+}
+
+/**
+ * ไทยช่วยไทย subsidy for a given payable amount.
+ * State covers THAI_HELP_RATE of the bill, up to THAI_HELP_CAP per bill.
+ * `available` (the wallet balance) further caps it when provided.
+ */
+export function computeThaiHelp(payable: number, available = Infinity): number {
+  if (payable <= 0) return 0
+  const raw = Math.min(payable * THAI_HELP_RATE, THAI_HELP_CAP, available)
+  return Math.max(0, round2(raw))
 }
 
 export function calculateSplit(
@@ -29,6 +43,8 @@ export function calculateSplit(
       split_mode: session.split_mode,
       persons: [],
       grand_total: session.grand_total,
+      thai_help_amount: 0,
+      net_payable: session.grand_total,
       verified: true,
     }
   }
@@ -37,8 +53,19 @@ export function calculateSplit(
   const n = personFood.size
   const { delivery_fee, total_discount, split_mode: mode } = session
 
-  const persons: PersonTotal[] = []
+  // ไทยช่วยไทย: a SEPARATE layer from the shop discount. Its base is
+  // (food − discount) only — delivery is never subsidised. Apply the shop
+  // discount first, THEN compute the subsidy on that net-food figure:
+  //   subsidy = min(60% × (food − discount), ฿200, balance entered)
+  // Spread across people in proportion to what each one pays before subsidy.
+  const thaiHelpBase = Math.max(0, round2(foodSubtotal - total_discount))
+  const thaiHelp = session.thai_help_enabled
+    ? computeThaiHelp(thaiHelpBase, session.thai_help_balance ?? 0)
+    : 0
 
+  // First pass: each person's pre-subsidy total (food − discount + delivery).
+  const preTotals = new Map<string, { food: number; discount: number; delivery: number; pre: number }>()
+  let preSum = 0
   for (const [displayName, food] of personFood) {
     const ratio = foodSubtotal > 0 ? food / foodSubtotal : 0
 
@@ -56,25 +83,38 @@ export function calculateSplit(
       delivery = delivery_fee / n
     }
 
+    const pre = food - discount + delivery
+    preTotals.set(displayName, { food, discount, delivery, pre })
+    preSum += pre
+  }
+
+  const persons: PersonTotal[] = []
+  for (const [displayName, t] of preTotals) {
+    // Each person's slice of the subsidy is proportional to their pre-subsidy total.
+    const helpShare = preSum > 0 ? thaiHelp * (t.pre / preSum) : 0
     persons.push({
       display_name: displayName,
-      food_amount: round2(food),
-      discount_received: round2(discount),
-      delivery_share: round2(delivery),
-      total: round2(food - discount + delivery),
+      food_amount: round2(t.food),
+      discount_received: round2(t.discount),
+      delivery_share: round2(t.delivery),
+      thai_help_received: round2(helpShare),
+      total: round2(t.pre - helpShare),
     })
   }
 
   persons.sort((a, b) => b.food_amount - a.food_amount)
 
+  const netPayable = round2(session.grand_total - thaiHelp)
   const calcTotal = persons.reduce((s, p) => s + p.total, 0)
-  const verified = Math.abs(calcTotal - session.grand_total) < 0.10
+  const verified = Math.abs(calcTotal - netPayable) < 0.10
 
   return {
     session_id: session.id,
     split_mode: mode,
     persons,
     grand_total: session.grand_total,
+    thai_help_amount: thaiHelp,
+    net_payable: netPayable,
     verified,
   }
 }

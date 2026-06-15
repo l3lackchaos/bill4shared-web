@@ -142,6 +142,8 @@ export default async function ConfirmPage({ params }: Props) {
         totalDiscount={Number(session.total_discount)}
         grandTotal={Number(session.grand_total)}
         splitMode={Number(session.split_mode)}
+        thaiHelpEnabled={Boolean(session.thai_help_enabled)}
+        thaiHelpBalance={Number(session.thai_help_balance ?? 0)}
       />
     </div>
   )

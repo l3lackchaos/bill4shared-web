@@ -6,15 +6,22 @@ import type { PersonTotal } from '@/types'
 export default function CopyButton({
   persons,
   grandTotal,
+  thaiHelpAmount = 0,
 }: {
   persons: PersonTotal[]
   grandTotal: number
+  thaiHelpAmount?: number
 }) {
   const [copied, setCopied] = useState(false)
 
   function copyText() {
     const lines = persons.map(p => `${p.display_name}: ฿${p.total.toFixed(2)}`)
-    lines.push(`\nรวม: ฿${grandTotal.toFixed(2)}`)
+    if (thaiHelpAmount > 0) {
+      lines.push(`\n🇹🇭 ไทยช่วยไทย: -฿${thaiHelpAmount.toFixed(2)}`)
+      lines.push(`กลุ่มจ่ายจริง: ฿${grandTotal.toFixed(2)}`)
+    } else {
+      lines.push(`\nรวม: ฿${grandTotal.toFixed(2)}`)
+    }
     navigator.clipboard.writeText(lines.join('\n'))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)

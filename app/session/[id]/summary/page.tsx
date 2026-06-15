@@ -40,6 +40,8 @@ export default async function SummaryPage({ params }: Props) {
       delivery_fee: Number(session.delivery_fee),
       total_discount: Number(session.total_discount),
       grand_total: Number(session.grand_total),
+      thai_help_enabled: Boolean(session.thai_help_enabled),
+      thai_help_balance: Number(session.thai_help_balance ?? 0),
     },
     normalised,
   )
@@ -91,14 +93,17 @@ export default async function SummaryPage({ params }: Props) {
                       <span className="shrink-0">฿{item.share.toFixed(2)}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between text-xs pt-1 border-t border-gray-100">
+                  <div className="flex flex-wrap gap-x-3 justify-between text-xs pt-1 border-t border-gray-100">
                     {p.delivery_share > 0 && (
                       <span className="text-gray-400">ค่าส่ง +฿{p.delivery_share.toFixed(2)}</span>
                     )}
                     {p.discount_received > 0 && (
                       <span className="text-red-400">ส่วนลด -฿{p.discount_received.toFixed(2)}</span>
                     )}
-                    {p.delivery_share === 0 && p.discount_received === 0 && <span />}
+                    {p.thai_help_received > 0 && (
+                      <span className="text-amber-600">ไทยช่วยไทย -฿{p.thai_help_received.toFixed(2)}</span>
+                    )}
+                    {p.delivery_share === 0 && p.discount_received === 0 && p.thai_help_received === 0 && <span />}
                   </div>
                 </div>
               )}
@@ -107,12 +112,31 @@ export default async function SummaryPage({ params }: Props) {
         })}
       </div>
 
+      {result.thai_help_amount > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-3 text-sm space-y-1">
+          <div className="flex justify-between text-gray-600">
+            <span>ยอดบิล</span>
+            <span>฿{Number(session.grand_total).toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-amber-700">
+            <span>🇹🇭 ไทยช่วยไทย (รัฐช่วยจ่าย)</span>
+            <span>-฿{result.thai_help_amount.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
+
       <div className="bg-gray-900 text-white rounded-xl px-4 py-3 flex justify-between items-center mb-6">
-        <span className="text-sm font-medium">รวมทั้งหมด</span>
-        <span className="text-lg font-bold">฿{Number(session.grand_total).toFixed(2)}</span>
+        <span className="text-sm font-medium">
+          {result.thai_help_amount > 0 ? 'กลุ่มจ่ายจริง' : 'รวมทั้งหมด'}
+        </span>
+        <span className="text-lg font-bold">฿{result.net_payable.toFixed(2)}</span>
       </div>
 
-      <CopyButton persons={result.persons} grandTotal={Number(session.grand_total)} />
+      <CopyButton
+        persons={result.persons}
+        grandTotal={result.net_payable}
+        thaiHelpAmount={result.thai_help_amount}
+      />
 
       <div className="mt-4 flex gap-3">
         <Link
