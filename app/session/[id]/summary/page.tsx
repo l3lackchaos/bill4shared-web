@@ -159,6 +159,7 @@ export default async function SummaryPage({ params }: Props) {
           foodSubtotal={Number(session.food_subtotal)}
           deliveryFee={Number(session.delivery_fee)}
           totalDiscount={Number(session.total_discount)}
+          splitMode={Number(session.split_mode)}
           initialCharges={extraCharges}
         />
       </div>

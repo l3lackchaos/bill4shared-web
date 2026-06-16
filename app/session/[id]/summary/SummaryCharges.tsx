@@ -6,25 +6,34 @@ import type { ExtraCharge } from '@/types'
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 
-// Edit custom fees/discounts straight from the summary, then recompute & save.
-// grand_total is rederived from the fixed parts (food + delivery − discount)
-// plus the current extras, matching how the confirm step computes it.
+const MODE_OPTIONS = [
+  { mode: 1, label: 'Mode 1 — ตามสัดส่วน (ค่าส่ง+ส่วนลด ตาม %อาหาร)' },
+  { mode: 2, label: 'Mode 2 — ผสม (ค่าส่งหารเท่ากัน, ส่วนลดตาม %อาหาร)' },
+  { mode: 3, label: 'Mode 3 — เท่ากันหมด (หารหัวเท่ากัน)' },
+]
+
+// Edit custom fees/discounts and the split mode straight from the summary, then
+// recompute & save. grand_total is rederived from the fixed parts (food +
+// delivery − discount) plus the current extras, matching the confirm step.
 export default function SummaryCharges({
   sessionId,
   foodSubtotal,
   deliveryFee,
   totalDiscount,
+  splitMode,
   initialCharges,
 }: {
   sessionId: string
   foodSubtotal: number
   deliveryFee: number
   totalDiscount: number
+  splitMode: number
   initialCharges: ExtraCharge[]
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [charges, setCharges] = useState<ExtraCharge[]>(initialCharges)
+  const [mode, setMode] = useState(splitMode || 2)
   const [saving, setSaving] = useState(false)
 
   const num = (v: string) => {
@@ -59,7 +68,7 @@ export default function SummaryCharges({
     await fetch(`/api/sessions/${sessionId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ extra_charges: clean, grand_total: newGrand }),
+      body: JSON.stringify({ extra_charges: clean, grand_total: newGrand, split_mode: mode }),
     })
     setSaving(false)
     setOpen(false)
@@ -72,14 +81,27 @@ export default function SummaryCharges({
         onClick={() => setOpen(true)}
         className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors"
       >
-        แก้ไขค่าบริการ / ส่วนลด
+        แก้ไขโหมด / ค่าบริการ / ส่วนลด
       </button>
     )
   }
 
   return (
     <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 space-y-2 text-sm">
-      <p className="font-medium text-gray-700">ค่าบริการ / ส่วนลดเพิ่มเติม</p>
+      <div>
+        <label className="block text-xs font-medium text-gray-500 mb-1.5">โหมดแบ่งบิล</label>
+        <select
+          value={mode}
+          onChange={e => setMode(Number(e.target.value))}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+        >
+          {MODE_OPTIONS.map(o => (
+            <option key={o.mode} value={o.mode}>{o.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <p className="font-medium text-gray-700 pt-1">ค่าบริการ / ส่วนลดเพิ่มเติม</p>
 
       {charges.map((c, i) => (
         <div key={i} className="flex items-center gap-2">
@@ -130,7 +152,7 @@ export default function SummaryCharges({
           {saving ? 'กำลังบันทึก...' : 'บันทึก & คำนวณใหม่'}
         </button>
         <button
-          onClick={() => { setCharges(initialCharges); setOpen(false) }}
+          onClick={() => { setCharges(initialCharges); setMode(splitMode || 2); setOpen(false) }}
           className="px-3 text-sm text-gray-500 hover:text-gray-700"
         >
           ยกเลิก
