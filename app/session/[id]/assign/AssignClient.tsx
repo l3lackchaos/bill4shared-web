@@ -198,12 +198,15 @@ export default function AssignClient({
   const totalAssigned = items.filter(it => effectiveNames(it.id).length > 0).length
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      <Link href="/" className="text-sm text-ink-soft hover:text-ink-soft mb-6 inline-block">
-        ← กลับหน้าแรก
+    <div className="max-w-lg mx-auto px-4 pb-16">
+      <Link href="/" className="inline-flex items-center gap-1 text-sm text-ink-faint hover:text-ink pt-8 mb-5 transition-colors">
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        หน้าแรก
       </Link>
-      <h1 className="text-xl font-bold text-ink mb-1">แบ่งรายการ</h1>
-      <p className="text-sm text-ink-soft mb-6">
+      <h1 className="text-2xl font-bold text-ink mb-1">แบ่งรายการ</h1>
+      <p className="text-sm text-ink-faint mb-7">
         ระบุชื่อคนที่สั่งแต่ละรายการ — หารเท่ากัน หรือระบุราคาเองก็ได้
       </p>
 
@@ -216,7 +219,7 @@ export default function AssignClient({
           const mismatch = m === 'custom' && list.length > 0 && Math.abs(customSum - itemTotal) > 0.01
 
           return (
-            <div key={item.id} className="bg-surface rounded-xl border border-line p-4">
+            <div key={item.id} className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] p-4">
               <div className="flex justify-between items-start mb-3">
                 <p className="font-medium text-ink text-sm">{item.name}</p>
                 <p className="text-sm font-semibold text-ink">฿{itemTotal.toFixed(2)}</p>
@@ -370,7 +373,7 @@ export default function AssignClient({
       <button
         onClick={finalize}
         disabled={loading || totalAssigned === 0}
-        className="w-full bg-[var(--brand)] text-white py-2.5 rounded-lg font-medium hover:bg-[var(--brand-strong)] disabled:opacity-40 transition-colors"
+        className="w-full bg-[var(--brand)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 transition-all duration-200"
       >
         {loading ? 'กำลังคำนวณ...' : `คำนวณบิล (${totalAssigned}/${items.length} รายการ)`}
       </button>

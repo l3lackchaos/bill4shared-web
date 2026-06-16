@@ -61,12 +61,15 @@ export default async function ConfirmPage({ params }: Props) {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      <Link href="/" className="text-sm text-ink-soft hover:text-ink-soft mb-6 inline-block">
-        ← กลับหน้าแรก
+    <div className="max-w-lg mx-auto px-4 pb-16">
+      <Link href="/" className="inline-flex items-center gap-1 text-sm text-ink-faint hover:text-ink pt-8 mb-5 transition-colors">
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        หน้าแรก
       </Link>
-      <h1 className="text-xl font-bold text-ink mb-1">ยืนยันรายการ</h1>
-      <p className="text-sm text-ink-soft mb-4">ตรวจสอบรายการก่อนไปขั้นตอนถัดไป</p>
+      <h1 className="text-2xl font-bold text-ink mb-1">ยืนยันรายการ</h1>
+      <p className="text-sm text-ink-faint mb-6">ตรวจสอบรายการก่อนไปขั้นตอนถัดไป</p>
 
       {!reconcile.balanced && (
         <div className="mb-4 rounded-xl border border-[var(--warn)]/30 bg-warn-tint px-4 py-3 text-sm">
@@ -89,7 +92,7 @@ export default async function ConfirmPage({ params }: Props) {
             const personItems = personGroups.get(name)!
             const subtotal = personItems.reduce((s, i) => s + i.unit_price * i.quantity, 0)
             return (
-              <div key={name} className="bg-surface rounded-xl border border-line overflow-hidden">
+              <div key={name} className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden">
                 <div className="flex justify-between items-center px-4 py-2 bg-brand-tint border-b border-line">
                   <p className="text-sm font-semibold text-brand-ink">{name}</p>
                   <p className="text-xs font-medium text-brand-strong">฿{subtotal.toFixed(2)}</p>
@@ -101,7 +104,7 @@ export default async function ConfirmPage({ params }: Props) {
             )
           })}
           {unassigned.length > 0 && (
-            <div className="bg-surface rounded-xl border border-line overflow-hidden">
+            <div className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden">
               <div className="px-4 py-2 bg-canvas border-b border-line">
                 <p className="text-sm font-semibold text-ink-soft">ไม่ระบุ</p>
               </div>
@@ -112,7 +115,7 @@ export default async function ConfirmPage({ params }: Props) {
           )}
         </div>
       ) : (
-        <div className="bg-surface rounded-xl border border-line divide-y divide-line mb-4">
+        <div className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] divide-y divide-line mb-4">
           {typedItems.map(item => (
             <div key={item.id} className="flex justify-between items-center px-4 py-3">
               <div>

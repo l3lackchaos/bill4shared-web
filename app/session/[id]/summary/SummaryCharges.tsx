@@ -147,7 +147,7 @@ export default function SummaryCharges({
         <button
           onClick={save}
           disabled={saving}
-          className="flex-1 bg-[var(--brand)] text-white py-2 rounded-lg text-sm font-medium hover:bg-[var(--brand-strong)] disabled:opacity-40 transition-colors"
+          className="flex-1 bg-[var(--brand)] text-white py-2.5 rounded-full text-sm font-semibold hover:bg-[var(--brand-strong)] active:scale-[0.98] disabled:opacity-40 transition-all duration-200"
         >
           {saving ? 'กำลังบันทึก...' : 'บันทึก & คำนวณใหม่'}
         </button>
