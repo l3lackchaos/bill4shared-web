@@ -88,22 +88,48 @@ export default function AssignClient({
     return isNaN(n) ? 0 : n
   }
 
+  // Roster = every distinct person who appears on any item. Used for quick-add
+  // chips and for the "equal split with no names → split among everyone" rule.
+  const roster = (() => {
+    const seen = new Set<string>()
+    const names: string[] = []
+    for (const list of Object.values(people)) {
+      for (const p of list) {
+        if (!seen.has(p.name)) { seen.add(p.name); names.push(p.name) }
+      }
+    }
+    return names
+  })()
+
+  // The people an item is actually split among. In equal mode with nobody picked,
+  // it falls back to the whole roster (auto split among everyone).
+  function effectiveNames(itemId: string): string[] {
+    const list = people[itemId] ?? []
+    if (list.length > 0) return list.map(p => p.name)
+    if ((mode[itemId] ?? 'equal') === 'equal') return roster
+    return []
+  }
+
   // In equal mode, everyone pays itemTotal / headcount. Compute on demand so it
-  // stays correct as people are added/removed.
+  // stays correct as people are added/removed (or via the roster fallback).
   function equalAmount(itemId: string): number {
     const total = itemTotalOf(items.find(i => i.id === itemId)!)
-    const n = (people[itemId] ?? []).length
+    const n = effectiveNames(itemId).length
     return n > 0 ? round2(total / n) : 0
   }
 
-  function addPerson(itemId: string) {
-    const name = (nameInput[itemId] ?? '').trim()
+  function addNamed(itemId: string, rawName: string) {
+    const name = rawName.trim()
     if (!name) return
     setPeople(prev => {
       const existing = prev[itemId] ?? []
       if (existing.some(p => p.name === name)) return prev
       return { ...prev, [itemId]: [...existing, { name, amount: 0 }] }
     })
+  }
+
+  function addPerson(itemId: string) {
+    addNamed(itemId, nameInput[itemId] ?? '')
     setNameInput(prev => ({ ...prev, [itemId]: '' }))
   }
 
@@ -123,19 +149,23 @@ export default function AssignClient({
 
     const allAssignments = items.flatMap(it => {
       const list = people[it.id] ?? []
-      if (list.length === 0) return []
       const total = itemTotalOf(it)
       const m = mode[it.id] ?? 'equal'
 
       if (m === 'equal') {
-        const n = list.length
-        return list.map(p => ({
+        // No one picked + equal mode → split among everyone in the bill (roster).
+        const names = list.length > 0 ? list.map(p => p.name) : roster
+        if (names.length === 0) return []
+        const n = names.length
+        return names.map(name => ({
           item_id: it.id,
-          display_name: p.name,
+          display_name: name,
           share_numerator: 1,
           share_denominator: n,
         }))
       }
+
+      if (list.length === 0) return []
 
       // custom: turn each person's baht amount into a fraction of the item total.
       // num/den must be integers (DB columns), so scale by 100 to keep satang.
@@ -163,7 +193,9 @@ export default function AssignClient({
     router.push(`/session/${sessionId}/summary`)
   }
 
-  const totalAssigned = items.filter(it => (people[it.id] ?? []).length > 0).length
+  // An item counts as assigned if it has picked people, or equal-mode falls back
+  // to the roster (so "ราเมง — หารเท่ากัน, ไม่เลือกใคร" still counts).
+  const totalAssigned = items.filter(it => effectiveNames(it.id).length > 0).length
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
@@ -204,6 +236,13 @@ export default function AssignClient({
                   </button>
                 ))}
               </div>
+
+              {/* Equal mode + nobody picked → auto split among everyone (roster) */}
+              {list.length === 0 && m === 'equal' && roster.length > 0 && (
+                <p className="text-xs text-gray-400 mb-2">
+                  หารเท่ากันทุกคน ({roster.length} คน) — คนละ ฿{equalAmount(item.id).toFixed(2)}
+                </p>
+              )}
 
               {list.length > 0 && (
                 <div className="space-y-1.5 mb-2">
@@ -247,31 +286,53 @@ export default function AssignClient({
               )}
 
               {adding[item.id] ? (
-                <div className="flex gap-2 mt-2">
-                  <input
-                    type="text"
-                    autoFocus
-                    placeholder="ใส่ชื่อคนหาร..."
-                    value={nameInput[item.id] ?? ''}
-                    onChange={e => setNameInput(prev => ({ ...prev, [item.id]: e.target.value }))}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') addPerson(item.id)
-                      if (e.key === 'Escape') setAdding(prev => ({ ...prev, [item.id]: false }))
-                    }}
-                    className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                  />
-                  <button
-                    onClick={() => addPerson(item.id)}
-                    className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700"
-                  >
-                    เพิ่ม
-                  </button>
-                  <button
-                    onClick={() => setAdding(prev => ({ ...prev, [item.id]: false }))}
-                    className="text-gray-400 hover:text-gray-600 px-1 text-xs"
-                  >
-                    เสร็จ
-                  </button>
+                <div className="mt-2 space-y-2">
+                  {/* Quick-add: tap a name already used elsewhere in this bill */}
+                  {(() => {
+                    const onItem = new Set(list.map(p => p.name))
+                    const suggestions = roster.filter(nm => !onItem.has(nm))
+                    if (suggestions.length === 0) return null
+                    return (
+                      <div className="flex flex-wrap gap-1.5">
+                        {suggestions.map(nm => (
+                          <button
+                            key={nm}
+                            onClick={() => addNamed(item.id, nm)}
+                            className="inline-flex items-center gap-1 bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 text-xs px-2 py-1 rounded-full transition-colors"
+                          >
+                            <span className="text-indigo-400">+</span> {nm}
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  })()}
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="ใส่ชื่อคนหาร..."
+                      value={nameInput[item.id] ?? ''}
+                      onChange={e => setNameInput(prev => ({ ...prev, [item.id]: e.target.value }))}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') addPerson(item.id)
+                        if (e.key === 'Escape') setAdding(prev => ({ ...prev, [item.id]: false }))
+                      }}
+                      className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                    />
+                    <button
+                      onClick={() => addPerson(item.id)}
+                      className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700"
+                    >
+                      เพิ่ม
+                    </button>
+                    <button
+                      onClick={() => setAdding(prev => ({ ...prev, [item.id]: false }))}
+                      className="text-gray-400 hover:text-gray-600 px-1 text-xs"
+                    >
+                      เสร็จ
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button
