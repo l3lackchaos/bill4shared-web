@@ -12,10 +12,11 @@ export default async function ConfirmPage({ params }: Props) {
   const { id } = await params
   const db = createServerClient()
 
-  const { data: session } = await db.from('sessions').select('*').eq('id', id).single()
+  const [{ data: session }, { data: items }] = await Promise.all([
+    db.from('sessions').select('*').eq('id', id).single(),
+    db.from('items').select('*').eq('session_id', id).order('id'),
+  ])
   if (!session) notFound()
-
-  const { data: items } = await db.from('items').select('*').eq('session_id', id).order('id')
   if (!items) notFound()
 
   if (session.status === 'done') redirect(`/session/${id}/summary`)

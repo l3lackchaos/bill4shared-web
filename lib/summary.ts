@@ -29,13 +29,13 @@ export interface SummaryData {
 export async function loadSummary(id: string): Promise<SummaryData | null> {
   const db = createServerClient()
 
-  const { data: session } = await db.from('sessions').select('*').eq('id', id).single()
+  // Fire both queries at once — items don't depend on the session row, so there's
+  // no reason to wait for one before the other (halves the DB round-trip time).
+  const [{ data: session }, { data: items }] = await Promise.all([
+    db.from('sessions').select('*').eq('id', id).single(),
+    db.from('items').select('*, assignments(*)').eq('session_id', id),
+  ])
   if (!session) return null
-
-  const { data: items } = await db
-    .from('items')
-    .select('*, assignments(*)')
-    .eq('session_id', id)
 
   type RawItem = BillItem & { assignments: ItemAssignment[] }
   const normalised = ((items ?? []) as RawItem[]).map(item => ({

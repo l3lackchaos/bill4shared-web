@@ -9,9 +9,11 @@ export const dynamic = 'force-dynamic'
 
 async function getSessions(): Promise<BillSession[]> {
   const db = createServerClient()
+  // Only the columns the list renders — skips the heavy ocr_raw jsonb on every
+  // row, which the list never uses (much smaller payload over 200 rows).
   const { data } = await db
     .from('sessions')
-    .select('*')
+    .select('id, created_at, status, grand_total')
     .order('created_at', { ascending: false })
     .limit(200)
   return (data ?? []) as BillSession[]
