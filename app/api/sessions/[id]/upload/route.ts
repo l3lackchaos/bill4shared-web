@@ -3,6 +3,11 @@ import { createServerClient } from '@/lib/supabase-server'
 import { parseReceiptImage, mergeParsedBills } from '@/lib/ocr'
 import type { ParsedBill } from '@/types'
 
+// OCR over several images via Claude can take a while — raise the serverless
+// timeout above the platform default so multi-page uploads don't get cut off.
+// (Vercel caps this at 60s on Hobby/Pro; ignored on other hosts.)
+export const maxDuration = 60
+
 type Params = { params: Promise<{ id: string }> }
 
 export async function POST(req: Request, { params }: Params) {
