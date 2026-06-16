@@ -197,6 +197,15 @@ export default function AssignClient({
   // to the roster (so "ราเมง — หารเท่ากัน, ไม่เลือกใคร" still counts).
   const totalAssigned = items.filter(it => effectiveNames(it.id).length > 0).length
 
+  // Running total of item value that has been assigned to someone, vs the whole
+  // food subtotal — lets the user see at a glance whether the bill is fully split.
+  const foodTotal = round2(items.reduce((s, it) => s + itemTotalOf(it), 0))
+  const assignedTotal = round2(
+    items.reduce((s, it) => (effectiveNames(it.id).length > 0 ? s + itemTotalOf(it) : s), 0),
+  )
+  const allCovered = Math.abs(assignedTotal - foodTotal) < 0.01 && foodTotal > 0
+  const pct = foodTotal > 0 ? Math.min(100, Math.round((assignedTotal / foodTotal) * 100)) : 0
+
   return (
     <div className="max-w-lg mx-auto px-4 pb-16">
       <Link href="/" className="inline-flex items-center gap-1 text-sm text-ink-faint hover:text-ink pt-8 mb-5 transition-colors">
@@ -354,19 +363,34 @@ export default function AssignClient({
         })}
       </div>
 
-      <div className="bg-canvas rounded-xl border border-line px-4 py-3 text-sm mb-6 space-y-1">
+      <div className="bg-canvas rounded-2xl border border-line px-4 py-3 text-sm mb-6 space-y-2">
+        {/* Running coverage — how much of the food has been assigned */}
+        <div>
+          <div className="flex justify-between items-center mb-1.5">
+            <span className="text-ink-soft">แบ่งแล้ว</span>
+            <span className={`tnum font-medium ${allCovered ? 'text-[var(--brand-strong)]' : 'text-ink'}`}>
+              ฿{assignedTotal.toFixed(2)} / ฿{foodTotal.toFixed(2)}
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-line overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[var(--brand)] transition-all duration-300"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        </div>
         {session.delivery_fee > 0 && (
-          <div className="flex justify-between text-ink-soft">
-            <span>ค่าจัดส่ง</span><span>฿{Number(session.delivery_fee).toFixed(2)}</span>
+          <div className="flex justify-between text-ink-soft pt-1">
+            <span>ค่าจัดส่ง</span><span className="tnum">฿{Number(session.delivery_fee).toFixed(2)}</span>
           </div>
         )}
         {session.total_discount > 0 && (
-          <div className="flex justify-between text-red-500">
-            <span>ส่วนลด</span><span>-฿{Number(session.total_discount).toFixed(2)}</span>
+          <div className="flex justify-between text-[var(--neg)]">
+            <span>ส่วนลด</span><span className="tnum">-฿{Number(session.total_discount).toFixed(2)}</span>
           </div>
         )}
         <div className="flex justify-between font-semibold text-ink pt-1 border-t border-line">
-          <span>รวม</span><span>฿{Number(session.grand_total).toFixed(2)}</span>
+          <span>รวม</span><span className="tnum">฿{Number(session.grand_total).toFixed(2)}</span>
         </div>
       </div>
 

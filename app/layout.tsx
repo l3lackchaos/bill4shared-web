@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "./ThemeToggle";
+import { ToastProvider } from "./Toast";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -70,12 +71,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={`${geist.className} bg-canvas text-ink min-h-screen`}>
-        {children}
-        {/* Floating theme switch — available on every page. Bottom-right keeps it
-            clear of page headers and back-links that live at the top. */}
-        <div className="fixed bottom-4 right-4 z-[var(--z-sticky)]">
-          <ThemeToggle />
-        </div>
+        <ToastProvider>
+          {children}
+          {/* Floating theme switch — available on every page. Bottom-right keeps
+              it clear of page headers and back-links that live at the top. */}
+          <div className="fixed bottom-4 right-4 z-[var(--z-sticky)]">
+            <ThemeToggle />
+          </div>
+        </ToastProvider>
       </body>
     </html>
   );

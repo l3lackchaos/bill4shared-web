@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ExtraCharge } from '@/types'
+import { useToast } from '../../../Toast'
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 
@@ -31,6 +32,7 @@ export default function SummaryCharges({
   initialCharges: ExtraCharge[]
 }) {
   const router = useRouter()
+  const toast = useToast()
   const [open, setOpen] = useState(false)
   const [charges, setCharges] = useState<ExtraCharge[]>(initialCharges)
   const [mode, setMode] = useState(splitMode || 2)
@@ -65,14 +67,19 @@ export default function SummaryCharges({
         kind: c.kind,
       }))
 
-    await fetch(`/api/sessions/${sessionId}`, {
+    const res = await fetch(`/api/sessions/${sessionId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ extra_charges: clean, grand_total: newGrand, split_mode: mode }),
     })
     setSaving(false)
-    setOpen(false)
-    router.refresh() // re-run the server component so totals recompute
+    if (res.ok) {
+      setOpen(false)
+      toast('บันทึกแล้ว คำนวณใหม่ให้แล้ว')
+      router.refresh() // re-run the server component so totals recompute
+    } else {
+      toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง', 'error')
+    }
   }
 
   if (!open) {

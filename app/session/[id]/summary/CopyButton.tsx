@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { PersonTotal } from '@/types'
+import { useToast } from '../../../Toast'
 
 export default function CopyButton({
   persons,
@@ -13,18 +14,24 @@ export default function CopyButton({
   thaiHelpAmount?: number
 }) {
   const [copied, setCopied] = useState(false)
+  const toast = useToast()
 
-  function copyText() {
+  async function copyText() {
     const lines = persons.map(p => `${p.display_name}: ฿${p.total.toFixed(2)}`)
     if (thaiHelpAmount > 0) {
-      lines.push(`\n🇹🇭 ไทยช่วยไทย: -฿${thaiHelpAmount.toFixed(2)}`)
+      lines.push(`\nไทยช่วยไทย: -฿${thaiHelpAmount.toFixed(2)}`)
       lines.push(`กลุ่มจ่ายจริง: ฿${grandTotal.toFixed(2)}`)
     } else {
       lines.push(`\nรวม: ฿${grandTotal.toFixed(2)}`)
     }
-    navigator.clipboard.writeText(lines.join('\n'))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'))
+      setCopied(true)
+      toast('คัดลอกสรุปแล้ว — วางในแชทได้เลย')
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast('คัดลอกไม่สำเร็จ', 'error')
+    }
   }
 
   return (

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { BillSession } from '@/types'
+import { useToast } from './Toast'
 
 const STATUS_LABEL: Record<string, string> = {
   collecting: 'กำลังรับรูป',
@@ -38,6 +39,7 @@ function billLabel(s: BillSession): string {
 
 export default function BillList({ sessions }: { sessions: BillSession[] }) {
   const router = useRouter()
+  const toast = useToast()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [page, setPage] = useState(1)
@@ -52,7 +54,10 @@ export default function BillList({ sessions }: { sessions: BillSession[] }) {
     if (res.ok) {
       setRemoved(prev => new Set(prev).add(id))
       setConfirmId(null)
+      toast('ลบบิลแล้ว')
       router.refresh() // re-sync from server in the background
+    } else {
+      toast('ลบไม่สำเร็จ ลองใหม่อีกครั้ง', 'error')
     }
     setDeletingId(null)
   }
