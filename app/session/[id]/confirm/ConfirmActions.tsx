@@ -249,12 +249,14 @@ export default function ConfirmActions({
         </select>
       </div>
 
-      {/* ไทยช่วยไทย — government co-pay subsidy (user enters remaining balance) */}
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+      {/* ไทยช่วยไทย — government co-pay subsidy (user enters remaining balance).
+          Uses warn tokens so the box adapts to light/dark instead of a fixed
+          cream that glares in dark mode. */}
+      <div className="rounded-xl border border-[var(--warn)]/25 bg-warn-tint px-4 py-3">
         <label className="flex items-center justify-between cursor-pointer">
           <span>
-            <span className="block text-sm font-semibold text-amber-900">🇹🇭 ไทยช่วยไทย</span>
-            <span className="block text-xs text-amber-700 mt-0.5">
+            <span className="block text-sm font-semibold text-ink">ไทยช่วยไทย</span>
+            <span className="block text-xs text-ink-soft mt-0.5">
               รัฐช่วยจ่าย {Math.round(THAI_HELP_RATE * 100)}% สูงสุด ฿{THAI_HELP_CAP}/บิล
             </span>
           </span>
@@ -264,14 +266,14 @@ export default function ConfirmActions({
             checked={thaiHelp}
             aria-label="เปิดใช้ไทยช่วยไทย"
             onChange={e => setThaiHelp(e.target.checked)}
-            className="h-6 w-11 shrink-0 appearance-none rounded-full bg-gray-300 checked:bg-amber-500 relative cursor-pointer transition-colors
+            className="h-6 w-11 shrink-0 appearance-none rounded-full bg-line checked:bg-[var(--warn)] relative cursor-pointer transition-colors
               before:absolute before:top-0.5 before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-surface before:shadow before:transition-transform checked:before:translate-x-5"
           />
         </label>
 
         {thaiHelp && (
-          <div className="mt-2.5 pt-2.5 border-t border-amber-200 space-y-2 text-xs">
-            <div className="flex justify-between items-center text-amber-800">
+          <div className="mt-2.5 pt-2.5 border-t border-[var(--warn)]/25 space-y-2 text-xs">
+            <div className="flex justify-between items-center text-ink-soft">
               <span>ยอดสิทธิ์คงเหลือ</span>
               <div className="flex items-center gap-1">
                 <span>฿</span>
@@ -281,20 +283,20 @@ export default function ConfirmActions({
                   value={balance}
                   onChange={e => setBalance(num(e.target.value))}
                   placeholder="0"
-                  className="w-24 text-right border border-amber-300 rounded px-2 py-1 bg-surface focus:outline-none focus:ring-1 focus:ring-amber-400"
+                  className="w-24 text-right border border-line rounded px-2 py-1 bg-surface text-ink focus:outline-none focus:ring-1 focus:ring-[var(--warn)]"
                 />
               </div>
             </div>
-            <div className="flex justify-between text-amber-800">
+            <div className="flex justify-between text-ink-soft">
               <span>รัฐช่วยจ่ายบิลนี้</span>
-              <span className="font-medium">-฿{subsidy.toFixed(2)}</span>
+              <span className="tnum font-medium text-[var(--warn)]">-฿{subsidy.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between font-semibold text-amber-900">
+            <div className="flex justify-between font-semibold text-ink">
               <span>กลุ่มจ่ายจริง</span>
-              <span>฿{netPayable.toFixed(2)}</span>
+              <span className="tnum">฿{netPayable.toFixed(2)}</span>
             </div>
             {balance <= 0 && (
-              <p className="text-red-600">กรอกยอดสิทธิ์คงเหลือ — ถ้าเป็น 0 จะไม่ได้รับส่วนช่วย</p>
+              <p className="text-[var(--neg)]">กรอกยอดสิทธิ์คงเหลือ — ถ้าเป็น 0 จะไม่ได้รับส่วนช่วย</p>
             )}
           </div>
         )}
