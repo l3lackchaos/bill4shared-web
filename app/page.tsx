@@ -51,9 +51,11 @@ export default async function HomePage() {
       </div>
 
       {sessions.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-4xl mb-3">🧾</p>
-          <p className="text-sm">ยังไม่มีบิล — กด "บิลใหม่" เพื่อเริ่ม</p>
+        <div className="text-center py-16">
+          <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p className="text-sm text-gray-500">ยังไม่มีบิล — กด &ldquo;บิลใหม่&rdquo; เพื่อเริ่ม</p>
         </div>
       ) : (
         <div className="space-y-3">

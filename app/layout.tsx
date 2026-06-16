@@ -1,14 +1,45 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"] });
 
 const ADSENSE_CLIENT = "ca-pub-3479386406572719";
+const SITE_URL = "https://www.bill4shared.site";
 
 export const metadata: Metadata = {
-  title: "Bill4Shared — แตกบิลง่ายๆ",
-  description: "อัปโหลดรูปบิล แล้วแตกหารกันเลย",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Bill4Shared — แตกบิลง่ายๆ จากรูปใบเสร็จ",
+    template: "%s — Bill4Shared",
+  },
+  description:
+    "ถ่ายรูปใบเสร็จหรือบิล LINE MAN แล้วให้ AI อ่านรายการ แบ่งหารกับเพื่อนอัตโนมัติ พร้อมค่าส่ง ส่วนลด และไทยช่วยไทย",
+  applicationName: "Bill4Shared",
+  keywords: ["แตกบิล", "หารบิล", "แชร์บิล", "หารค่าอาหาร", "bill split", "LINE MAN", "ไทยช่วยไทย"],
+  // apex + www serve the same content; point canonical at the primary host
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "th_TH",
+    url: SITE_URL,
+    siteName: "Bill4Shared",
+    title: "Bill4Shared — แตกบิลง่ายๆ จากรูปใบเสร็จ",
+    description:
+      "ถ่ายรูปบิล แล้วให้ AI อ่านรายการ แบ่งหารกับเพื่อนอัตโนมัติ พร้อมค่าส่ง ส่วนลด และไทยช่วยไทย",
+  },
+  twitter: {
+    card: "summary",
+    title: "Bill4Shared — แตกบิลง่ายๆ จากรูปใบเสร็จ",
+    description: "ถ่ายรูปบิล แล้วให้ AI แบ่งหารกับเพื่อนอัตโนมัติ",
+  },
+  robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#4f46e5", // indigo-600 — matches the brand accent / browser chrome
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

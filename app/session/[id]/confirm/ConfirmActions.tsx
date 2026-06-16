@@ -192,22 +192,28 @@ export default function ConfirmActions({
               />
             </div>
             <button
+              type="button"
               onClick={() => removeCharge(i)}
-              className="text-gray-300 hover:text-red-500 text-sm px-0.5"
+              aria-label={`ลบ ${c.label || (c.kind === 'fee' ? 'ค่าบริการ' : 'ส่วนลด')}`}
+              className="text-gray-300 hover:text-red-500 w-7 h-7 flex items-center justify-center shrink-0 transition-colors"
             >
-              ×
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
         ))}
 
         <div className="flex gap-3 pt-0.5">
           <button
+            type="button"
             onClick={() => addCharge('fee')}
             className="text-indigo-600 hover:text-indigo-700 text-xs font-medium"
           >
             + ค่าบริการ
           </button>
           <button
+            type="button"
             onClick={() => addCharge('discount')}
             className="text-red-500 hover:text-red-600 text-xs font-medium"
           >
@@ -254,10 +260,12 @@ export default function ConfirmActions({
           </span>
           <input
             type="checkbox"
+            role="switch"
             checked={thaiHelp}
+            aria-label="เปิดใช้ไทยช่วยไทย"
             onChange={e => setThaiHelp(e.target.checked)}
-            className="h-5 w-9 shrink-0 appearance-none rounded-full bg-gray-300 checked:bg-amber-500 relative cursor-pointer transition-colors
-              before:absolute before:top-0.5 before:left-0.5 before:h-4 before:w-4 before:rounded-full before:bg-white before:transition-transform checked:before:translate-x-4"
+            className="h-6 w-11 shrink-0 appearance-none rounded-full bg-gray-300 checked:bg-amber-500 relative cursor-pointer transition-colors
+              before:absolute before:top-0.5 before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform checked:before:translate-x-5"
           />
         </label>
 

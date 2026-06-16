@@ -1,18 +1,23 @@
 @import "tailwindcss";
 
 /*
- * Bill4Shared is a light-themed app: every surface is built on white cards over
- * a gray-50 canvas with indigo accents. We intentionally LOCK the app to a light
- * color scheme. The previous prefers-color-scheme:dark block flipped the body
- * background to near-black while components kept hardcoded light colors
- * (bg-white cards, text-gray-900 headings) — leaving dark-on-dark text that was
- * unreadable. Forcing light keeps contrast correct everywhere.
+ * Bill4Shared — light-themed bill-splitting app. White cards over a gray-50
+ * canvas with indigo accents. We LOCK the color scheme to light: a previous
+ * prefers-color-scheme:dark block flipped the body dark while components kept
+ * hardcoded light colors, leaving unreadable dark-on-dark text.
  */
 
 :root {
-  --background: #f9fafb; /* gray-50 — matches the canvas the layout expects */
+  --background: #f9fafb; /* gray-50 — the canvas the layout expects */
   --foreground: #171717;
-  color-scheme: light; /* keep form controls, scrollbars, etc. in light mode */
+  color-scheme: light;
+
+  /* Semantic z-index scale — never use arbitrary 999/9999 */
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-toast: 50;
 }
 
 @theme inline {
@@ -25,4 +30,30 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  /* Smoother type rendering on macOS/iOS where most bill photos are taken */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * Visible focus ring for keyboard users on every interactive element. Mouse
+ * clicks don't trigger :focus-visible, so this only shows for keyboard/AT nav —
+ * fixes the "no visible focus state" a11y gap without affecting pointer users.
+ */
+:focus-visible {
+  outline: 2px solid #6366f1; /* indigo-500 */
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Honor reduced-motion: collapse all animation/transition to near-instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

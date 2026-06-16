@@ -265,10 +265,14 @@ export default function AssignClient({
                         </div>
                       )}
                       <button
+                        type="button"
                         onClick={() => removePerson(item.id, p.name)}
-                        className="text-gray-300 hover:text-red-500 text-sm px-1"
+                        aria-label={`ลบ ${p.name} ออกจาก ${item.name}`}
+                        className="text-gray-300 hover:text-red-500 w-7 h-7 flex items-center justify-center shrink-0 transition-colors"
                       >
-                        ×
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
                     </div>
                   ))}
