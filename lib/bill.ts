@@ -1,4 +1,4 @@
-import type { BillItem, ItemAssignment, PersonTotal, SplitResult, SplitMode } from '@/types'
+import type { BillItem, ItemAssignment, PersonTotal, SplitResult, SplitMode, ExtraCharge } from '@/types'
 import { THAI_HELP_RATE, THAI_HELP_CAP } from '@/types'
 
 interface SessionData {
@@ -8,8 +8,22 @@ interface SessionData {
   delivery_fee: number
   total_discount: number
   grand_total: number
+  extra_charges?: ExtraCharge[]
   thai_help_enabled?: boolean
   thai_help_balance?: number // remaining subsidy balance the user entered for this bill
+}
+
+// Sum extra charges into fee/discount totals. Fees join delivery, discounts join
+// total_discount, so they ride the existing split_mode math unchanged.
+export function sumExtraCharges(charges: ExtraCharge[] = []): { fees: number; discounts: number } {
+  let fees = 0
+  let discounts = 0
+  for (const c of charges) {
+    const amt = Math.abs(Number(c.amount) || 0)
+    if (c.kind === 'discount') discounts += amt
+    else fees += amt
+  }
+  return { fees: round2(fees), discounts: round2(discounts) }
 }
 
 /**
@@ -51,7 +65,13 @@ export function calculateSplit(
 
   const foodSubtotal = [...personFood.values()].reduce((s, v) => s + v, 0)
   const n = personFood.size
-  const { delivery_fee, total_discount, split_mode: mode } = session
+  const { split_mode: mode } = session
+
+  // Fold custom extra charges into the fee/discount buckets so they split with
+  // the same mode logic: fees add to delivery, discounts add to total_discount.
+  const extra = sumExtraCharges(session.extra_charges)
+  const delivery_fee = round2(session.delivery_fee + extra.fees)
+  const total_discount = round2(session.total_discount + extra.discounts)
 
   // ไทยช่วยไทย: a SEPARATE layer from the shop discount. Its base is
   // (food − discount) only — delivery is never subsidised. Apply the shop

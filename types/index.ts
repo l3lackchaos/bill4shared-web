@@ -2,6 +2,15 @@ export type BillStatus = 'collecting' | 'confirming' | 'assigning' | 'done' | 'c
 export type BillType = 'group_order' | 'physical' | 'typed' | 'unknown'
 export type SplitMode = 1 | 2 | 3
 
+// Custom line item the user adds on the confirm step (service charge, VAT,
+// ค่าภาชนะ, extra discount, …). A 'fee' adds to the bill (split like delivery),
+// a 'discount' subtracts (split like total_discount), per the session split_mode.
+export interface ExtraCharge {
+  label: string
+  amount: number // always a positive magnitude; `kind` decides the sign
+  kind: 'fee' | 'discount'
+}
+
 export interface BillSession {
   id: string
   status: BillStatus
@@ -11,6 +20,7 @@ export interface BillSession {
   delivery_fee: number
   total_discount: number
   grand_total: number
+  extra_charges: ExtraCharge[]
   thai_help_enabled: boolean
   thai_help_balance: number // remaining subsidy balance the user entered for this bill
   thai_help_amount: number // subsidy actually applied = min(60%, cap, balance)

@@ -5,6 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { computeThaiHelp } from '@/lib/bill'
 import { THAI_HELP_RATE, THAI_HELP_CAP } from '@/types'
+import type { ExtraCharge } from '@/types'
 
 const MODE_OPTIONS = [
   { mode: 1, label: 'Mode 1 — ตามสัดส่วน (ค่าส่ง+ส่วนลด ตาม %อาหาร)' },
@@ -22,6 +23,7 @@ export default function ConfirmActions({
   splitMode,
   thaiHelpEnabled,
   thaiHelpBalance,
+  extraCharges,
 }: {
   sessionId: string
   billType: string
@@ -32,6 +34,7 @@ export default function ConfirmActions({
   splitMode: number
   thaiHelpEnabled: boolean
   thaiHelpBalance: number
+  extraCharges: ExtraCharge[]
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -39,7 +42,14 @@ export default function ConfirmActions({
   const [delivery, setDelivery] = useState(deliveryFee)
   const [discount, setDiscount] = useState(totalDiscount)
   const [mode, setMode] = useState(splitMode || 2)
-  // null → keep grand_total in sync with food + delivery − discount; a number → user override
+  // Custom extra charges (service charge, VAT, ค่าภาชนะ, extra discount, …)
+  const [charges, setCharges] = useState<ExtraCharge[]>(extraCharges)
+
+  // Net effect of extra charges on the bill total: fees add, discounts subtract.
+  const extraFees = charges.filter(c => c.kind === 'fee').reduce((s, c) => s + (Number(c.amount) || 0), 0)
+  const extraDiscounts = charges.filter(c => c.kind === 'discount').reduce((s, c) => s + (Number(c.amount) || 0), 0)
+
+  // null → keep grand_total in sync with food + delivery − discount + extras; a number → user override
   const [grandOverride, setGrandOverride] = useState<number | null>(
     Math.abs(grandTotal - (foodSubtotal + deliveryFee - totalDiscount)) > 0.01 ? grandTotal : null,
   )
@@ -48,8 +58,21 @@ export default function ConfirmActions({
   const [thaiHelp, setThaiHelp] = useState(thaiHelpEnabled)
   const [balance, setBalance] = useState(thaiHelpBalance)
 
-  const computedGrand = Math.round((foodSubtotal + delivery - discount) * 100) / 100
+  const computedGrand = Math.round((foodSubtotal + delivery - discount + extraFees - extraDiscounts) * 100) / 100
   const grand = grandOverride ?? computedGrand
+
+  function addCharge(kind: ExtraCharge['kind']) {
+    setCharges(prev => [...prev, { label: '', amount: 0, kind }])
+    setGrandOverride(null) // re-sync total when charges change
+  }
+  function updateCharge(i: number, patch: Partial<ExtraCharge>) {
+    setCharges(prev => prev.map((c, idx) => (idx === i ? { ...c, ...patch } : c)))
+    setGrandOverride(null)
+  }
+  function removeCharge(i: number) {
+    setCharges(prev => prev.filter((_, idx) => idx !== i))
+    setGrandOverride(null)
+  }
 
   // ไทยช่วยไทย base = (food − discount), excluding delivery. Subsidy =
   // min(60% × base, ฿200 cap, balance entered). Keep this identical to
@@ -75,11 +98,17 @@ export default function ConfirmActions({
     setLoading(true)
     // Persist edits to fees / discount / mode + ไทยช่วยไทย before calculating.
     // thai_help_amount is the applied subsidy; store it so the summary matches.
+    // Drop blank rows (no label and no amount) before saving.
+    const cleanCharges = charges
+      .filter(c => c.label.trim() !== '' || Number(c.amount) > 0)
+      .map(c => ({ label: c.label.trim() || (c.kind === 'fee' ? 'ค่าบริการ' : 'ส่วนลด'), amount: Math.abs(Number(c.amount) || 0), kind: c.kind }))
+
     await patch({
       delivery_fee: delivery,
       total_discount: discount,
       grand_total: grand,
       split_mode: mode,
+      extra_charges: cleanCharges,
       thai_help_enabled: thaiHelp,
       thai_help_balance: balance,
       thai_help_amount: subsidy,
@@ -139,6 +168,51 @@ export default function ConfirmActions({
               className="w-20 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             />
           </div>
+        </div>
+
+        {/* Custom extra charges / discounts */}
+        {charges.map((c, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={c.label}
+              placeholder={c.kind === 'fee' ? 'ชื่อค่าบริการ' : 'ชื่อส่วนลด'}
+              onChange={e => updateCharge(i, { label: e.target.value })}
+              className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+            />
+            <div className={`flex items-center gap-1 ${c.kind === 'discount' ? 'text-red-600' : 'text-gray-600'}`}>
+              <span>{c.kind === 'discount' ? '-฿' : '฿'}</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={c.amount || ''}
+                placeholder="0"
+                onChange={e => updateCharge(i, { amount: num(e.target.value) })}
+                className="w-16 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              />
+            </div>
+            <button
+              onClick={() => removeCharge(i)}
+              className="text-gray-300 hover:text-red-500 text-sm px-0.5"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+
+        <div className="flex gap-3 pt-0.5">
+          <button
+            onClick={() => addCharge('fee')}
+            className="text-indigo-600 hover:text-indigo-700 text-xs font-medium"
+          >
+            + ค่าบริการ
+          </button>
+          <button
+            onClick={() => addCharge('discount')}
+            className="text-red-500 hover:text-red-600 text-xs font-medium"
+          >
+            + ส่วนลด
+          </button>
         </div>
 
         <div className="flex justify-between items-center font-semibold text-gray-900 pt-2 border-t border-gray-200">

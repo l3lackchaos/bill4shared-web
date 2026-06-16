@@ -144,6 +144,7 @@ export default async function ConfirmPage({ params }: Props) {
         splitMode={Number(session.split_mode)}
         thaiHelpEnabled={Boolean(session.thai_help_enabled)}
         thaiHelpBalance={Number(session.thai_help_balance ?? 0)}
+        extraCharges={(session.extra_charges ?? []) as Parameters<typeof ConfirmActions>[0]['extraCharges']}
       />
     </div>
   )

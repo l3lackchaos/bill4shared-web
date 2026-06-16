@@ -40,6 +40,7 @@ export default async function SummaryPage({ params }: Props) {
       delivery_fee: Number(session.delivery_fee),
       total_discount: Number(session.total_discount),
       grand_total: Number(session.grand_total),
+      extra_charges: session.extra_charges ?? [],
       thai_help_enabled: Boolean(session.thai_help_enabled),
       thai_help_balance: Number(session.thai_help_balance ?? 0),
     },

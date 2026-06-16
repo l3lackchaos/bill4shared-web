@@ -22,7 +22,7 @@ export async function PATCH(req: Request, { params }: Params) {
   const body = await req.json()
   const db = createServerClient()
 
-  const allowed = ['status', 'bill_type', 'split_mode', 'food_subtotal', 'delivery_fee', 'total_discount', 'grand_total', 'ocr_raw', 'thai_help_enabled', 'thai_help_balance', 'thai_help_amount']
+  const allowed = ['status', 'bill_type', 'split_mode', 'food_subtotal', 'delivery_fee', 'total_discount', 'grand_total', 'ocr_raw', 'extra_charges', 'thai_help_enabled', 'thai_help_balance', 'thai_help_amount']
   const update = Object.fromEntries(Object.entries(body).filter(([k]) => allowed.includes(k)))
 
   const { data, error } = await db
