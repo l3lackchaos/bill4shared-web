@@ -26,6 +26,27 @@ Rules:
 - delivery_fee = ค่าจัดส่ง NET as POSITIVE number (after any delivery discount applied)
 - total_discount = food_subtotal + delivery_fee - grand_total (derive from grand total to capture hidden discounts)
 - All prices as numbers only, no ฿ symbol
+
+Physical / paper receipt rules (POS, restaurant, McDonald's, Café, etc.):
+- grand_total = the amount ACTUALLY PAID. Use the line that equals the payment/
+  tender (Total, ยอดชำระ, Eat-In Total, Amount Paid, or the card/cash line such
+  as Visa/Cash). It is usually the LARGEST money figure on the receipt.
+- VAT IS NOT A DISCOUNT. On "VAT included / incl Tax" receipts the price already
+  contains tax. Lines like "Net Total" / "ยอดก่อนภาษี" (pre-tax) and
+  "Tax Included" / "ภาษี 7%" are a breakdown of the SAME total — never subtract
+  them. Set has_vat=true and vat_amount=the tax figure, but do NOT let the
+  pre-tax (Net) figure become grand_total, or a phantom discount appears.
+  Example: Subtotal 294, Net Total 274.77, Tax Included 19.23, Visa 294
+           => grand_total=294, food_subtotal=294, vat_amount=19.23, total_discount=0.
+- food_subtotal = sum of item line totals (the Subtotal line before any real
+  discount). If the only difference from grand_total is tax, they are equal.
+- Only count a real discount line (ส่วนลด / Discount / Promotion / coupon) toward
+  a lower grand_total. Rounding Adjustment is not a discount.
+- Item amounts: the printed price column is the LINE total. If quantity > 1,
+  unit_price = line total / quantity. Merge an item that wraps onto a second line
+  (e.g. "3 pcs. McPatongo with 1" + "Condensed milk Dip") into ONE item name.
+  Skip non-item lines (Subtotal, Total, Tax, Rounding, Change, card info).
+
 - Collapsed/hidden person sections (section header visible but items hidden): still include that person with one item named "รายการ" and unit_price = the visible person total, quantity 1
 - Receipt may be cut off / partially visible: parse what is visible, set unknown totals to 0
 - CRITICAL: respond with ONLY the JSON object. No explanations, no text before or after, no markdown fences`
@@ -164,6 +185,45 @@ for (const { label, p1, p2, expectBalanced } of BILLS) {
     console.log(`  ${ok ? '✅' : '❌'} ${name}`)
     if (!ok) failures++
   }
+}
+
+// ── Physical / paper receipts (single image) ──────────────────────────────
+// Drop any paper-receipt photos into bill-example/4/ and they'll be parsed here.
+// Physical bills are VAT-inclusive POS slips: grand_total must be the amount
+// PAID (not the pre-tax Net Total), and VAT must NOT become a phantom discount.
+import { existsSync, readdirSync } from 'fs'
+
+const PHYS_DIR = './bill-example/4'
+if (existsSync(PHYS_DIR)) {
+  const files = readdirSync(PHYS_DIR).filter(f => /\.(jpe?g|png|webp)$/i.test(f))
+  for (const file of files) {
+    console.log(`\n############ PHYSICAL: ${file} ############`)
+    const b = await parse(`${PHYS_DIR}/${file}`)
+    printBill('PARSED', b)
+    const merged = merge([b]) // run through the same pipeline (cleanup + derive)
+    printBill('NORMALIZED', merged)
+
+    const allItems = merged.persons.flatMap(p => p.items).concat(merged.items)
+    const rec = reconcileItems(allItems, merged.food_subtotal)
+    // grand_total should equal the items sum on a VAT-inclusive bill with no real
+    // discount (VAT is inside the price, not subtracted).
+    const discountIsTax = merged.total_discount > 0 &&
+      Math.abs(merged.total_discount - (merged.vat_amount ?? 0)) < 0.5
+
+    const checks = [
+      ['has items', allItems.length > 0],
+      ['grand_total looks like amount paid (≥ Σitems-ish)', merged.grand_total >= rec.itemsTotal - 0.5],
+      ['VAT not treated as a discount', !discountIsTax],
+      ['reconcile balanced (items ≈ food)', rec.balanced],
+    ]
+    console.log(`RECONCILE: Σitems=${rec.itemsTotal} food=${rec.foodSubtotal} grand=${merged.grand_total} discount=${merged.total_discount} vat=${b.vat_amount ?? 0}`)
+    for (const [name, ok] of checks) {
+      console.log(`  ${ok ? '✅' : '⚠️ '} ${name}`)
+      if (!ok) failures++
+    }
+  }
+} else {
+  console.log(`\n(skip physical: create ${PHYS_DIR}/ and add a receipt photo to test)`)
 }
 
 console.log(`\n${failures === 0 ? '✅ ALL CHECKS PASSED' : `❌ ${failures} CHECK(S) FAILED`}`)
