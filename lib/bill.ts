@@ -77,48 +77,42 @@ export function calculateSplit(
   // (food − discount) only — delivery is never subsidised. Apply the shop
   // discount first, THEN compute the subsidy on that net-food figure:
   //   subsidy = min(60% × (food − discount), ฿200, balance entered)
-  // Spread across people in proportion to what each one pays before subsidy.
+  // The subsidy is spread per the split mode, EXACTLY like the shop discount:
+  // mode 1 & 2 by food ratio (%อาหาร), mode 3 equal per head.
   const thaiHelpBase = Math.max(0, round2(foodSubtotal - total_discount))
   const thaiHelp = session.thai_help_enabled
     ? computeThaiHelp(thaiHelpBase, session.thai_help_balance ?? 0)
     : 0
 
-  // First pass: each person's pre-subsidy total (food − discount + delivery).
-  const preTotals = new Map<string, { food: number; discount: number; delivery: number; pre: number }>()
-  let preSum = 0
+  const persons: PersonTotal[] = []
   for (const [displayName, food] of personFood) {
     const ratio = foodSubtotal > 0 ? food / foodSubtotal : 0
 
     let discount: number
     let delivery: number
+    let helpShare: number
 
     if (mode === 1) {
       discount = ratio * total_discount
       delivery = ratio * delivery_fee
+      helpShare = ratio * thaiHelp
     } else if (mode === 2) {
       discount = ratio * total_discount
       delivery = delivery_fee / n
+      helpShare = ratio * thaiHelp
     } else {
       discount = total_discount / n
       delivery = delivery_fee / n
+      helpShare = thaiHelp / n
     }
 
-    const pre = food - discount + delivery
-    preTotals.set(displayName, { food, discount, delivery, pre })
-    preSum += pre
-  }
-
-  const persons: PersonTotal[] = []
-  for (const [displayName, t] of preTotals) {
-    // Each person's slice of the subsidy is proportional to their pre-subsidy total.
-    const helpShare = preSum > 0 ? thaiHelp * (t.pre / preSum) : 0
     persons.push({
       display_name: displayName,
-      food_amount: round2(t.food),
-      discount_received: round2(t.discount),
-      delivery_share: round2(t.delivery),
+      food_amount: round2(food),
+      discount_received: round2(discount),
+      delivery_share: round2(delivery),
       thai_help_received: round2(helpShare),
-      total: round2(t.pre - helpShare),
+      total: round2(food - discount + delivery - helpShare),
     })
   }
 
