@@ -260,7 +260,7 @@ export default function AssignClient({
                             value={p.amount || ''}
                             placeholder="0"
                             onChange={e => setPersonAmount(item.id, p.name, num(e.target.value))}
-                            className="w-20 text-right border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                            className="w-20 text-right border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
                           />
                         </div>
                       )}
@@ -322,11 +322,11 @@ export default function AssignClient({
                         if (e.key === 'Enter') addPerson(item.id)
                         if (e.key === 'Escape') setAdding(prev => ({ ...prev, [item.id]: false }))
                       }}
-                      className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                      className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
                     />
                     <button
                       onClick={() => addPerson(item.id)}
-                      className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700"
+                      className="bg-[var(--brand)] text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-[var(--brand-strong)]"
                     >
                       เพิ่ม
                     </button>
@@ -341,7 +341,7 @@ export default function AssignClient({
               ) : (
                 <button
                   onClick={() => setAdding(prev => ({ ...prev, [item.id]: true }))}
-                  className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 text-xs font-medium mt-1"
+                  className="inline-flex items-center gap-1 text-[var(--brand-strong)] hover:text-[var(--brand)] text-xs font-medium mt-1"
                 >
                   <span className="text-base leading-none">+</span> เพิ่มคนหาร
                 </button>
@@ -370,7 +370,7 @@ export default function AssignClient({
       <button
         onClick={finalize}
         disabled={loading || totalAssigned === 0}
-        className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-40 transition-colors"
+        className="w-full bg-[var(--brand)] text-white py-2.5 rounded-lg font-medium hover:bg-[var(--brand-strong)] disabled:opacity-40 transition-colors"
       >
         {loading ? 'กำลังคำนวณ...' : `คำนวณบิล (${totalAssigned}/${items.length} รายการ)`}
       </button>

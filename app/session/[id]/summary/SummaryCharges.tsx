@@ -93,7 +93,7 @@ export default function SummaryCharges({
         <select
           value={mode}
           onChange={e => setMode(Number(e.target.value))}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
         >
           {MODE_OPTIONS.map(o => (
             <option key={o.mode} value={o.mode}>{o.label}</option>
@@ -110,7 +110,7 @@ export default function SummaryCharges({
             value={c.label}
             placeholder={c.kind === 'fee' ? 'ชื่อค่าบริการ' : 'ชื่อส่วนลด'}
             onChange={e => updateCharge(i, { label: e.target.value })}
-            className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+            className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
           />
           <div className={`flex items-center gap-1 ${c.kind === 'discount' ? 'text-red-600' : 'text-gray-600'}`}>
             <span>{c.kind === 'discount' ? '-฿' : '฿'}</span>
@@ -120,7 +120,7 @@ export default function SummaryCharges({
               value={c.amount || ''}
               placeholder="0"
               onChange={e => updateCharge(i, { amount: num(e.target.value) })}
-              className="w-16 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              className="w-16 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
           </div>
           <button onClick={() => removeCharge(i)} className="text-gray-300 hover:text-red-500 text-sm px-0.5">
@@ -130,7 +130,7 @@ export default function SummaryCharges({
       ))}
 
       <div className="flex gap-3 pt-0.5">
-        <button onClick={() => addCharge('fee')} className="text-indigo-600 hover:text-indigo-700 text-xs font-medium">
+        <button onClick={() => addCharge('fee')} className="text-[var(--brand-strong)] hover:text-[var(--brand)] text-xs font-medium">
           + ค่าบริการ
         </button>
         <button onClick={() => addCharge('discount')} className="text-red-500 hover:text-red-600 text-xs font-medium">
@@ -147,7 +147,7 @@ export default function SummaryCharges({
         <button
           onClick={save}
           disabled={saving}
-          className="flex-1 bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-40 transition-colors"
+          className="flex-1 bg-[var(--brand)] text-white py-2 rounded-lg text-sm font-medium hover:bg-[var(--brand-strong)] disabled:opacity-40 transition-colors"
         >
           {saving ? 'กำลังบันทึก...' : 'บันทึก & คำนวณใหม่'}
         </button>

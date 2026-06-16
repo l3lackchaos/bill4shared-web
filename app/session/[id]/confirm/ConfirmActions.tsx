@@ -148,7 +148,7 @@ export default function ConfirmActions({
               inputMode="decimal"
               value={delivery}
               onChange={e => setDelivery(num(e.target.value))}
-              className="w-20 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              className="w-20 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function ConfirmActions({
                 setDiscount(num(e.target.value))
                 setGrandOverride(null) // re-sync grand total when discount changes
               }}
-              className="w-20 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              className="w-20 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
           </div>
         </div>
@@ -178,7 +178,7 @@ export default function ConfirmActions({
               value={c.label}
               placeholder={c.kind === 'fee' ? 'ชื่อค่าบริการ' : 'ชื่อส่วนลด'}
               onChange={e => updateCharge(i, { label: e.target.value })}
-              className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
             <div className={`flex items-center gap-1 ${c.kind === 'discount' ? 'text-red-600' : 'text-gray-600'}`}>
               <span>{c.kind === 'discount' ? '-฿' : '฿'}</span>
@@ -188,7 +188,7 @@ export default function ConfirmActions({
                 value={c.amount || ''}
                 placeholder="0"
                 onChange={e => updateCharge(i, { amount: num(e.target.value) })}
-                className="w-16 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                className="w-16 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
               />
             </div>
             <button
@@ -208,7 +208,7 @@ export default function ConfirmActions({
           <button
             type="button"
             onClick={() => addCharge('fee')}
-            className="text-indigo-600 hover:text-indigo-700 text-xs font-medium"
+            className="text-[var(--brand-strong)] hover:text-[var(--brand)] text-xs font-medium"
           >
             + ค่าบริการ
           </button>
@@ -230,7 +230,7 @@ export default function ConfirmActions({
               inputMode="decimal"
               value={grand}
               onChange={e => setGrandOverride(num(e.target.value))}
-              className="w-24 text-right border border-gray-200 rounded px-2 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              className="w-24 text-right border border-gray-200 rounded px-2 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
           </div>
         </div>
@@ -241,7 +241,7 @@ export default function ConfirmActions({
         <select
           value={mode}
           onChange={e => setMode(Number(e.target.value))}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
         >
           {MODE_OPTIONS.map(o => (
             <option key={o.mode} value={o.mode}>{o.label}</option>
@@ -303,7 +303,7 @@ export default function ConfirmActions({
       <button
         onClick={confirm}
         disabled={loading}
-        className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-40 transition-colors"
+        className="w-full bg-[var(--brand)] text-white py-2.5 rounded-lg font-medium hover:bg-[var(--brand-strong)] disabled:opacity-40 transition-colors"
       >
         {loading ? 'กำลังดำเนินการ...' : billType === 'group_order' ? 'ยืนยัน → ดูสรุป' : 'ยืนยัน → แบ่งรายการ'}
       </button>

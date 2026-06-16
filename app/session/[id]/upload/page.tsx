@@ -48,12 +48,15 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8">
-      <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">
-        ← กลับหน้าแรก
+    <div className="max-w-md mx-auto px-4 pb-16">
+      <Link href="/" className="inline-flex items-center gap-1 text-sm text-ink-faint hover:text-ink pt-8 mb-5 transition-colors">
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        หน้าแรก
       </Link>
-      <h1 className="text-xl font-bold text-gray-900 mb-1">อัปโหลดรูปบิล</h1>
-      <p className="text-sm text-gray-500 mb-6">ส่งได้หลายรูปถ้าบิลมีหลายหน้า</p>
+      <h1 className="text-2xl font-bold text-ink mb-1">อัปโหลดรูปบิล</h1>
+      <p className="text-sm text-ink-faint mb-7">ส่งได้หลายรูปถ้าบิลมีหลายหน้า</p>
 
       <div
         role="button"
@@ -109,9 +112,10 @@ export default function UploadPage() {
       {error && <p role="alert" className="mt-3 text-sm text-red-600">{error}</p>}
 
       <button
+        type="button"
         onClick={upload}
         disabled={files.length === 0 || loading}
-        className="mt-6 w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-40 transition-colors"
+        className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-[var(--brand)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 transition-all duration-200"
       >
         {loading ? 'กำลัง OCR รูปบิล...' : `วิเคราะห์บิล (${files.length} รูป)`}
       </button>

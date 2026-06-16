@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4f46e5", // indigo-600 — matches the brand accent / browser chrome
+  themeColor: "#0d9268", // emerald brand — matches --brand, tints browser chrome
   width: "device-width",
   initialScale: 1,
 };

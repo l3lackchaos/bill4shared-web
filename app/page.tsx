@@ -14,12 +14,14 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: 'ยกเลิก',
 }
 
-const STATUS_COLOR: Record<string, string> = {
-  collecting: 'bg-blue-100 text-blue-700',
-  confirming: 'bg-yellow-100 text-yellow-700',
-  assigning: 'bg-orange-100 text-orange-700',
-  done: 'bg-green-100 text-green-700',
-  cancelled: 'bg-gray-100 text-gray-500',
+// Status dots — color carries meaning but is paired with a text label (not
+// color-only), so it stays accessible.
+const STATUS_DOT: Record<string, string> = {
+  collecting: 'bg-sky-500',
+  confirming: 'bg-amber-500',
+  assigning: 'bg-orange-500',
+  done: 'bg-[var(--brand)]',
+  cancelled: 'bg-gray-400',
 }
 
 async function getSessions(): Promise<BillSession[]> {
@@ -36,62 +38,78 @@ export default async function HomePage() {
   const sessions = await getSessions()
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Bill4Shared</h1>
-          <p className="text-gray-500 text-sm mt-0.5">แตกบิลง่ายๆ จากรูปใบเสร็จ</p>
+    <div className="max-w-2xl mx-auto px-4 pb-16">
+      {/* Branded header */}
+      <header className="flex items-center justify-between pt-8 pb-7">
+        <div className="flex items-center gap-2.5">
+          <span className="grid place-items-center w-9 h-9 rounded-xl bg-[var(--brand)] text-white shadow-[var(--shadow-sm)]">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 4h6m-3 4h3M5 3h14a1 1 0 011 1v17l-3-2-3 2-3-2-3 2-3-2 1 1V4a1 1 0 011-1z" />
+            </svg>
+          </span>
+          <div>
+            <h1 className="text-lg font-bold text-ink leading-tight">Bill4Shared</h1>
+            <p className="text-ink-faint text-xs">แตกบิลง่ายๆ จากรูปใบเสร็จ</p>
+          </div>
         </div>
         <Link
           href="/new"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="inline-flex items-center gap-1.5 bg-[var(--brand)] text-white pl-3 pr-4 py-2 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-95 transition-all duration-200"
         >
-          + บิลใหม่
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          บิลใหม่
         </Link>
-      </div>
+      </header>
 
       {sessions.length === 0 ? (
-        <div className="text-center py-16">
-          <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <p className="text-sm text-gray-500">ยังไม่มีบิล — กด &ldquo;บิลใหม่&rdquo; เพื่อเริ่ม</p>
+        <div className="text-center py-20 px-6 rise">
+          <span className="grid place-items-center w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-tint">
+            <svg className="w-8 h-8 text-[var(--brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 4h6m-3 4h3M5 3h14a1 1 0 011 1v17l-3-2-3 2-3-2-3 2-3-2V4a1 1 0 011-1z" />
+            </svg>
+          </span>
+          <h2 className="text-base font-semibold text-ink mb-1">ยังไม่มีบิล</h2>
+          <p className="text-sm text-ink-soft mb-6">ถ่ายรูปใบเสร็จ แล้วให้เราแบ่งหารให้</p>
+          <Link
+            href="/new"
+            className="inline-flex items-center gap-1.5 bg-[var(--brand)] text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-95 transition-all duration-200"
+          >
+            สร้างบิลแรก
+          </Link>
         </div>
       ) : (
-        <div className="space-y-3">
-          {sessions.map(s => (
-            <Link
-              key={s.id}
-              href={`/session/${s.id}`}
-              className="block bg-white rounded-xl border border-gray-200 px-4 py-3 hover:border-indigo-300 hover:shadow-sm transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-gray-900 text-sm">
-                    บิล {new Date(s.created_at).toLocaleDateString('th-TH', {
-                      day: 'numeric',
-                      month: 'short',
-                    })}
+        <ul className="space-y-2.5 list-none p-0">
+          {sessions.map((s, i) => (
+            <li key={s.id} className="rise" style={{ animationDelay: `${Math.min(i * 40, 320)}ms` }}>
+              <Link
+                href={`/session/${s.id}`}
+                className="group flex items-center justify-between bg-surface rounded-2xl border border-line px-4 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 transition-all duration-200"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold text-ink text-sm">
+                    บิล {new Date(s.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(s.created_at).toLocaleTimeString('th-TH', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                  <p className="flex items-center gap-1.5 text-xs text-ink-faint mt-0.5">
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT[s.status] ?? 'bg-gray-400'}`} aria-hidden="true" />
+                    {STATUS_LABEL[s.status] ?? s.status}
+                    <span className="text-line">·</span>
+                    {new Date(s.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-gray-800">
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="tnum text-lg font-bold text-ink">
                     {s.grand_total > 0 ? `฿${s.grand_total.toFixed(0)}` : '—'}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[s.status] ?? 'bg-gray-100 text-gray-500'}`}>
-                    {STATUS_LABEL[s.status] ?? s.status}
-                  </span>
+                  <svg className="w-4 h-4 text-ink-faint group-hover:text-[var(--brand)] group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   )

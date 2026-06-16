@@ -29,10 +29,29 @@ export default function CopyButton({
 
   return (
     <button
+      type="button"
       onClick={copyText}
-      className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors"
+      className={`w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+        copied
+          ? 'bg-brand-tint text-brand-ink'
+          : 'bg-surface border border-line text-ink-soft hover:border-[var(--brand)]/40 hover:text-ink'
+      }`}
     >
-      {copied ? 'คัดลอกแล้ว!' : 'คัดลอกสรุป'}
+      {copied ? (
+        <>
+          <svg className="w-4 h-4 text-[var(--brand)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          คัดลอกแล้ว!
+        </>
+      ) : (
+        <>
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+          </svg>
+          คัดลอกสรุป
+        </>
+      )}
     </button>
   )
 }

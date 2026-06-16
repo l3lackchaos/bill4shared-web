@@ -21,52 +21,64 @@ export default function NewSessionPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8">
-      <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">
-        ← กลับ
+    <div className="max-w-md mx-auto px-4 pb-16">
+      <Link href="/" className="inline-flex items-center gap-1 text-sm text-ink-faint hover:text-ink pt-8 mb-5 transition-colors">
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        หน้าแรก
       </Link>
-      <h1 className="text-xl font-bold text-gray-900 mb-6">บิลใหม่</h1>
+      <h1 className="text-2xl font-bold text-ink mb-1">บิลใหม่</h1>
+      <p className="text-sm text-ink-faint mb-7">เลือกวิธีแบ่งค่าส่งและส่วนลด</p>
 
-      <div className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">โหมดแบ่งบิล</label>
-          <div className="space-y-2">
-            {[
-              { mode: 1 as const, label: 'Mode 1 — ตามสัดส่วน', desc: 'ค่าส่ง + ส่วนลด ตาม % อาหาร' },
-              { mode: 2 as const, label: 'Mode 2 — ผสม (แนะนำ)', desc: 'ค่าส่ง หารเท่ากัน, ส่วนลด ตาม % อาหาร' },
-              { mode: 3 as const, label: 'Mode 3 — เท่ากันหมด', desc: 'ค่าส่ง + ส่วนลด หารหัวเท่ากัน' },
-            ].map(({ mode, label, desc }) => (
-              <label
-                key={mode}
-                className={`flex items-start gap-3 border rounded-lg px-3 py-2.5 cursor-pointer transition-colors ${
-                  splitMode === mode ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="mode"
-                  value={mode}
-                  checked={splitMode === mode}
-                  onChange={() => setSplitMode(mode)}
-                  className="mt-0.5"
-                />
-                <div>
-                  <p className="text-sm font-medium text-gray-800">{label}</p>
-                  <p className="text-xs text-gray-500">{desc}</p>
-                </div>
-              </label>
-            ))}
-          </div>
-        </div>
+      <fieldset className="space-y-2.5 border-0 p-0 m-0">
+        <legend className="text-xs font-semibold text-ink-soft uppercase tracking-wide mb-2">โหมดแบ่งบิล</legend>
+        {[
+          { mode: 1 as const, label: 'ตามสัดส่วน', desc: 'ค่าส่ง + ส่วนลด ตาม % อาหาร' },
+          { mode: 2 as const, label: 'ผสม', desc: 'ค่าส่งหารเท่ากัน, ส่วนลดตาม % อาหาร', rec: true },
+          { mode: 3 as const, label: 'เท่ากันหมด', desc: 'ค่าส่ง + ส่วนลด หารหัวเท่ากัน' },
+        ].map(({ mode, label, desc, rec }) => {
+          const active = splitMode === mode
+          return (
+            <label
+              key={mode}
+              className={`flex items-center gap-3 rounded-2xl px-4 py-3 cursor-pointer transition-all duration-200 ${
+                active
+                  ? 'bg-brand-tint border-2 border-[var(--brand)] shadow-[var(--shadow-sm)]'
+                  : 'bg-surface border-2 border-line hover:border-[var(--brand)]/30'
+              }`}
+            >
+              <input
+                type="radio"
+                name="mode"
+                value={mode}
+                checked={active}
+                onChange={() => setSplitMode(mode)}
+                className="sr-only"
+              />
+              <span className={`grid place-items-center w-5 h-5 rounded-full border-2 shrink-0 transition-colors ${active ? 'border-[var(--brand)]' : 'border-line'}`}>
+                {active && <span className="w-2.5 h-2.5 rounded-full bg-[var(--brand)]" />}
+              </span>
+              <span className="flex-1">
+                <span className="flex items-center gap-2">
+                  <span className={`text-sm font-semibold ${active ? 'text-brand-ink' : 'text-ink'}`}>{label}</span>
+                  {rec && <span className="text-[10px] font-bold uppercase tracking-wide bg-[var(--brand)] text-white px-1.5 py-0.5 rounded-full">แนะนำ</span>}
+                </span>
+                <span className="block text-xs text-ink-faint mt-0.5">{desc}</span>
+              </span>
+            </label>
+          )
+        })}
+      </fieldset>
 
-        <button
-          onClick={create}
-          disabled={loading}
-          className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-        >
-          {loading ? 'กำลังสร้าง...' : 'สร้างบิลและอัปโหลดรูป'}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={create}
+        disabled={loading}
+        className="mt-7 w-full inline-flex items-center justify-center gap-2 bg-[var(--brand)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all duration-200"
+      >
+        {loading ? 'กำลังสร้าง...' : 'สร้างบิลและอัปโหลดรูป'}
+      </button>
     </div>
   )
 }

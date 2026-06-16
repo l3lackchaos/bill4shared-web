@@ -1,52 +1,102 @@
 @import "tailwindcss";
 
 /*
- * Bill4Shared — light-themed bill-splitting app. White cards over a gray-50
- * canvas with indigo accents. We LOCK the color scheme to light: a previous
- * prefers-color-scheme:dark block flipped the body dark while components kept
- * hardcoded light colors, leaving unreadable dark-on-dark text.
+ * Bill4Shared design system — "settle up, fast."
+ *
+ * Scene: friends just finished eating; whoever paid opens this on their phone,
+ * mid-restaurant or on the ride home, to see who owes what and paste it into the
+ * group chat. So: mobile-first, the amount-owed is the hero, everything reads in
+ * one glance.
+ *
+ * Palette (committed strategy): emerald/teal brand on a true off-white. Money-
+ * green that feels friendly, not the indigo SaaS default and not fintech navy.
+ * OKLCH throughout. Light scheme locked (components assume light surfaces).
  */
 
 :root {
-  --background: #f9fafb; /* gray-50 — the canvas the layout expects */
-  --foreground: #171717;
   color-scheme: light;
 
-  /* Semantic z-index scale — never use arbitrary 999/9999 */
+  /* Brand ramp — emerald/teal */
+  --brand: oklch(0.62 0.13 168); /* primary action */
+  --brand-strong: oklch(0.52 0.13 168); /* hover/active */
+  --brand-tint: oklch(0.96 0.03 168); /* selected surface */
+  --brand-ink: oklch(0.34 0.08 168); /* text on tint */
+
+  /* Neutrals — true off-white canvas, near-black ink */
+  --canvas: oklch(0.985 0.002 250); /* page background */
+  --surface: oklch(1 0 0); /* cards */
+  --ink: oklch(0.21 0.01 260); /* primary text */
+  --ink-soft: oklch(0.44 0.01 260); /* secondary text (≥4.5:1 on surface) */
+  --ink-faint: oklch(0.58 0.01 260); /* tertiary / hints */
+  --line: oklch(0.92 0.004 260); /* borders */
+
+  /* Accents for money semantics */
+  --pos: oklch(0.55 0.13 150); /* fees / add (green) */
+  --neg: oklch(0.58 0.17 25); /* discounts (red) */
+  --warn: oklch(0.7 0.13 75); /* warnings (amber) */
+  --warn-tint: oklch(0.96 0.04 85);
+
+  /* Tuned shadows — soft, layered, brand-tinted (not pure black) */
+  --shadow-sm: 0 1px 2px oklch(0.4 0.03 200 / 0.06), 0 1px 1px oklch(0.4 0.03 200 / 0.04);
+  --shadow-md: 0 2px 4px oklch(0.4 0.03 200 / 0.06), 0 4px 12px oklch(0.4 0.03 200 / 0.08);
+  --shadow-lg: 0 8px 24px oklch(0.4 0.03 200 / 0.12);
+
+  --radius: 14px;
+
+  /* Semantic z-index scale */
   --z-dropdown: 10;
   --z-sticky: 20;
   --z-overlay: 30;
   --z-modal: 40;
   --z-toast: 50;
+
+  /* Smooth, premium easing (no bounce) */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --background: var(--canvas);
+  --foreground: var(--ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-tint: var(--brand-tint);
+  --color-brand-ink: var(--brand-ink);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-pos: var(--pos);
+  --color-neg: var(--neg);
+  --color-warn: var(--warn);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  /* Smoother type rendering on macOS/iOS where most bill photos are taken */
+  background: var(--canvas);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/*
- * Visible focus ring for keyboard users on every interactive element. Mouse
- * clicks don't trigger :focus-visible, so this only shows for keyboard/AT nav —
- * fixes the "no visible focus state" a11y gap without affecting pointer users.
- */
+/* Keyboard-only focus ring */
 :focus-visible {
-  outline: 2px solid #6366f1; /* indigo-500 */
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-/* Honor reduced-motion: collapse all animation/transition to near-instant. */
+/* Tabular figures for money so columns of ฿ amounts align */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -56,4 +106,13 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Subtle entrance for content lists — respects reduced-motion above */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.rise {
+  animation: rise 0.4s var(--ease-out) both;
 }
