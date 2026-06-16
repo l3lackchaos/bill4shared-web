@@ -305,7 +305,7 @@ export default function ConfirmActions({
       <button
         onClick={confirm}
         disabled={loading}
-        className="w-full bg-[var(--brand)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 transition-all duration-200"
+        className="w-full bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 transition-all duration-200"
       >
         {loading ? 'กำลังดำเนินการ...' : billType === 'group_order' ? 'ยืนยัน → ดูสรุป' : 'ยืนยัน → แบ่งรายการ'}
       </button>

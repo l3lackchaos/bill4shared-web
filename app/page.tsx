@@ -25,7 +25,7 @@ export default async function HomePage() {
       {/* Branded header */}
       <header className="flex items-center justify-between pt-8 pb-7">
         <div className="flex items-center gap-2.5">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-[var(--brand)] text-white shadow-[var(--shadow-sm)]">
+          <span className="grid place-items-center w-9 h-9 rounded-xl text-white shadow-[var(--shadow-md)] bg-[image:var(--brand-grad)]">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 4h6m-3 4h3M5 3h14a1 1 0 011 1v17l-3-2-3 2-3-2-3 2-3-2 1 1V4a1 1 0 011-1z" />
             </svg>
@@ -37,7 +37,7 @@ export default async function HomePage() {
         </div>
         <Link
           href="/new"
-          className="inline-flex items-center gap-1.5 bg-[var(--brand)] text-white pl-3 pr-4 py-2 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-95 transition-all duration-200"
+          className="inline-flex items-center gap-1.5 bg-[image:var(--brand-grad)] text-white pl-3 pr-4 py-2 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-95 transition-all duration-200"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -57,7 +57,7 @@ export default async function HomePage() {
           <p className="text-sm text-ink-soft mb-6">ถ่ายรูปใบเสร็จ แล้วให้เราแบ่งหารให้</p>
           <Link
             href="/new"
-            className="inline-flex items-center gap-1.5 bg-[var(--brand)] text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-95 transition-all duration-200"
+            className="inline-flex items-center gap-1.5 bg-[image:var(--brand-grad)] text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-95 transition-all duration-200"
           >
             สร้างบิลแรก
           </Link>

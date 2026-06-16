@@ -21,6 +21,17 @@
   --brand-strong: oklch(0.52 0.13 168); /* hover/active */
   --brand-tint: oklch(0.96 0.03 168); /* selected surface */
   --brand-ink: oklch(0.34 0.08 168); /* text on tint */
+  /* Rich brand gradient — teal → green, for hero surfaces and CTAs */
+  --brand-grad: linear-gradient(135deg, oklch(0.66 0.14 175), oklch(0.56 0.15 158));
+  --brand-grad-soft: linear-gradient(135deg, oklch(0.97 0.03 175), oklch(0.96 0.04 150));
+
+  /* Per-person avatar colors — vivid, cycled by name hash. Each is [bg, ink]. */
+  --av-1: oklch(0.7 0.15 25);   /* coral */
+  --av-2: oklch(0.7 0.15 60);   /* amber */
+  --av-3: oklch(0.68 0.14 140); /* green */
+  --av-4: oklch(0.68 0.13 195); /* cyan */
+  --av-5: oklch(0.62 0.16 285); /* violet */
+  --av-6: oklch(0.66 0.16 330); /* pink */
 
   /* Neutrals — true off-white canvas, near-black ink */
   --canvas: oklch(0.985 0.002 250); /* page background */
@@ -113,21 +124,17 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Soft ambient brand glow anchored top-center — gives the flat canvas depth
-     without a heavy gradient. Subtle in light, a touch more present in dark. */
-  background-image: radial-gradient(
-    120% 60% at 50% -10%,
-    oklch(0.62 0.13 168 / 0.07),
-    transparent 60%
-  );
+  /* Two ambient color blooms (teal top-left, green-amber top-right) give the
+     canvas real depth and a lively, non-minimal feel. */
+  background-image:
+    radial-gradient(80% 50% at 15% -5%, oklch(0.62 0.14 175 / 0.12), transparent 55%),
+    radial-gradient(70% 45% at 95% 0%, oklch(0.7 0.13 110 / 0.1), transparent 55%);
   background-attachment: fixed;
 }
 .dark body {
-  background-image: radial-gradient(
-    120% 60% at 50% -10%,
-    oklch(0.72 0.13 168 / 0.1),
-    transparent 55%
-  );
+  background-image:
+    radial-gradient(80% 50% at 15% -5%, oklch(0.62 0.16 175 / 0.16), transparent 55%),
+    radial-gradient(70% 45% at 95% 0%, oklch(0.7 0.14 110 / 0.12), transparent 55%);
 }
 
 /* Keyboard-only focus ring */

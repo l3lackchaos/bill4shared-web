@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { loadSummary } from '@/lib/summary'
+import Avatar from '../../Avatar'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -37,7 +38,7 @@ export default async function SharePage({ params }: Props) {
   return (
     <div className="max-w-md mx-auto px-4 pb-16">
       <div className="flex items-center gap-2.5 pt-8 pb-6">
-        <span className="grid place-items-center w-9 h-9 rounded-xl bg-[var(--brand)] text-white shadow-[var(--shadow-sm)]">
+        <span className="grid place-items-center w-9 h-9 rounded-xl text-white shadow-[var(--shadow-md)] bg-[image:var(--brand-grad)]">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 4h6m-3 4h3M5 3h14a1 1 0 011 1v17l-3-2-3 2-3-2-3 2-3-2 1 1V4a1 1 0 011-1z" />
           </svg>
@@ -57,8 +58,9 @@ export default async function SharePage({ params }: Props) {
               className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden rise"
               style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
             >
-              <div className="flex justify-between items-center px-4 py-3.5">
-                <p className="font-semibold text-ink">{p.display_name}</p>
+              <div className="flex items-center gap-3 px-4 py-3.5">
+                <Avatar name={p.display_name} />
+                <p className="font-semibold text-ink flex-1 min-w-0 truncate">{p.display_name}</p>
                 <p className="tnum text-2xl font-extrabold text-[var(--brand-strong)] leading-none">
                   ฿{p.total.toFixed(2)}
                 </p>

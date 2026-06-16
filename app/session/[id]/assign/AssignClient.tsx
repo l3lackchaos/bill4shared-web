@@ -338,7 +338,7 @@ export default function AssignClient({
                     />
                     <button
                       onClick={() => addPerson(item.id)}
-                      className="bg-[var(--brand)] text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-[var(--brand-strong)]"
+                      className="bg-[image:var(--brand-grad)] text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:brightness-105"
                     >
                       เพิ่ม
                     </button>
@@ -397,7 +397,7 @@ export default function AssignClient({
       <button
         onClick={finalize}
         disabled={loading || totalAssigned === 0}
-        className="w-full bg-[var(--brand)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 transition-all duration-200"
+        className="w-full bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 transition-all duration-200"
       >
         {loading ? 'กำลังคำนวณ...' : `คำนวณบิล (${totalAssigned}/${items.length} รายการ)`}
       </button>

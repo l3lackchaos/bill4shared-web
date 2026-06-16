@@ -75,7 +75,7 @@ export default function NewSessionPage() {
         type="button"
         onClick={create}
         disabled={loading}
-        className="mt-7 w-full inline-flex items-center justify-center gap-2 bg-[var(--brand)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all duration-200"
+        className="mt-7 w-full inline-flex items-center justify-center gap-2 bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all duration-200"
       >
         {loading ? 'กำลังสร้าง...' : 'สร้างบิลและอัปโหลดรูป'}
       </button>

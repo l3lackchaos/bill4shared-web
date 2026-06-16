@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { loadSummary } from '@/lib/summary'
 import Link from 'next/link'
+import Avatar from '../../../Avatar'
 import CopyButton from './CopyButton'
 import SummaryCharges from './SummaryCharges'
 import ShareButton from './ShareButton'
@@ -51,8 +52,9 @@ export default async function SummaryPage({ params }: Props) {
               className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden rise card-lift"
               style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
             >
-              <div className="flex justify-between items-center px-4 py-3.5">
-                <p className="font-semibold text-ink">{p.display_name}</p>
+              <div className="flex items-center gap-3 px-4 py-3.5">
+                <Avatar name={p.display_name} />
+                <p className="font-semibold text-ink flex-1 min-w-0 truncate">{p.display_name}</p>
                 <p className="tnum text-2xl font-extrabold text-[var(--brand-strong)] leading-none">
                   ฿{p.total.toFixed(2)}
                 </p>
