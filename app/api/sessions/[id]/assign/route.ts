@@ -53,9 +53,13 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'item_id not in session' }, { status: 400 })
   }
 
-  const itemIds = [...new Set(incoming.map(a => a.item_id))]
-  if (itemIds.length > 0) {
-    await db.from('assignments').delete().in('item_id', itemIds)
+  // Make this save authoritative: clear ALL assignments for the session's items,
+  // then insert the incoming set. Deleting only the items present in the payload
+  // left stale rows on items the user cleared during a re-edit (everyone removed
+  // → that item_id is absent from incoming → its old assignments survived).
+  const allItemIds = [...sessionItemIds]
+  if (allItemIds.length > 0) {
+    await db.from('assignments').delete().in('item_id', allItemIds)
   }
 
   if (incoming.length > 0) {

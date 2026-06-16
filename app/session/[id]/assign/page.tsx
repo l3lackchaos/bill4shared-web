@@ -1,5 +1,5 @@
 import { createServerClient } from '@/lib/supabase-server'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import AssignClient from './AssignClient'
 
 type Props = { params: Promise<{ id: string }> }
@@ -10,7 +10,10 @@ export default async function AssignPage({ params }: Props) {
 
   const { data: session } = await db.from('sessions').select('*').eq('id', id).single()
   if (!session) notFound()
-  if (session.status === 'done') redirect(`/session/${id}/summary`)
+  // Note: do NOT redirect when status === 'done'. The summary page's
+  // "แก้ไขการแบ่ง" button links here to re-edit a finished bill — bouncing back
+  // to the summary made editing impossible. finalize() re-saves and returns to
+  // the summary, so allowing this page to load on a done bill is correct.
 
   const { data: items } = await db
     .from('items')

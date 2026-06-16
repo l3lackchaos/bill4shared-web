@@ -41,7 +41,13 @@ export default function AssignClient({
   )
 
   const [personInput, setPersonInput] = useState<Record<string, string>>({})
+  // Which items currently have the "add person" input box open.
+  const [adding, setAdding] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(false)
+
+  function openAdd(itemId: string) {
+    setAdding(prev => ({ ...prev, [itemId]: true }))
+  }
 
   function addPerson(itemId: string) {
     const name = (personInput[itemId] ?? '').trim()
@@ -54,6 +60,7 @@ export default function AssignClient({
       return { ...prev, [itemId]: updated.map(a => ({ ...a, share_denominator: n })) }
     })
     setPersonInput(prev => ({ ...prev, [itemId]: '' }))
+    // keep the box open so adding several people in a row stays fast
   }
 
   function removePerson(itemId: string, displayName: string) {
@@ -134,22 +141,41 @@ export default function AssignClient({
                 </div>
               )}
 
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="ชื่อ..."
-                  value={personInput[item.id] ?? ''}
-                  onChange={e => setPersonInput(prev => ({ ...prev, [item.id]: e.target.value }))}
-                  onKeyDown={e => e.key === 'Enter' && addPerson(item.id)}
-                  className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                />
+              {adding[item.id] ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="ใส่ชื่อคนหาร..."
+                    value={personInput[item.id] ?? ''}
+                    onChange={e => setPersonInput(prev => ({ ...prev, [item.id]: e.target.value }))}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') addPerson(item.id)
+                      if (e.key === 'Escape') setAdding(prev => ({ ...prev, [item.id]: false }))
+                    }}
+                    className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                  />
+                  <button
+                    onClick={() => addPerson(item.id)}
+                    className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700"
+                  >
+                    เพิ่ม
+                  </button>
+                  <button
+                    onClick={() => setAdding(prev => ({ ...prev, [item.id]: false }))}
+                    className="text-gray-400 hover:text-gray-600 px-1 text-xs"
+                  >
+                    เสร็จ
+                  </button>
+                </div>
+              ) : (
                 <button
-                  onClick={() => addPerson(item.id)}
-                  className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700"
+                  onClick={() => openAdd(item.id)}
+                  className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 text-xs font-medium"
                 >
-                  เพิ่ม
+                  <span className="text-base leading-none">+</span> เพิ่มคนหาร
                 </button>
-              </div>
+              )}
             </div>
           )
         })}
