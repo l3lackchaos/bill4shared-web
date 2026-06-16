@@ -22,6 +22,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `บิล ฿${data.result.net_payable.toFixed(0)}`,
     description: `แชร์บิล ${data.result.persons.length} คน — เปิดดูว่าใครจ่ายเท่าไหร่`,
+    // Private bill — keep it out of search engines even though the link is shareable.
+    robots: { index: false, follow: false },
   }
 }
 

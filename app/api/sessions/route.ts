@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
+import { rateLimitGuard } from '@/lib/rate-limit'
 
 export async function GET() {
   const db = createServerClient()
@@ -14,6 +15,10 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  // Cap new-bill creation: 20 per minute per IP.
+  const limited = rateLimitGuard(req, 'create', 20, 60_000)
+  if (limited) return limited
+
   const body = await req.json().catch(() => ({}))
   const db = createServerClient()
 

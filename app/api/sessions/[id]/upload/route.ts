@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
 import { parseReceiptImage, mergeParsedBills } from '@/lib/ocr'
+import { rateLimitGuard } from '@/lib/rate-limit'
 import type { ParsedBill } from '@/types'
 
 // OCR over several images via Claude can take a while — raise the serverless
@@ -11,6 +12,10 @@ export const maxDuration = 60
 type Params = { params: Promise<{ id: string }> }
 
 export async function POST(req: Request, { params }: Params) {
+  // OCR calls the Anthropic API (costs credit) — limit to 10 uploads/min per IP.
+  const limited = rateLimitGuard(req, 'ocr', 10, 60_000)
+  if (limited) return limited
+
   const { id } = await params
 
   const formData = await req.formData()
