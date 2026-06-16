@@ -2,8 +2,9 @@ import { createServerClient } from '@/lib/supabase-server'
 import { notFound } from 'next/navigation'
 import { calculateSplit } from '@/lib/bill'
 import Link from 'next/link'
-import type { BillItem, ItemAssignment, SplitMode } from '@/types'
+import type { BillItem, ItemAssignment, SplitMode, ExtraCharge } from '@/types'
 import CopyButton from './CopyButton'
+import SummaryCharges from './SummaryCharges'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -46,6 +47,8 @@ export default async function SummaryPage({ params }: Props) {
     },
     normalised,
   )
+
+  const extraCharges = (session.extra_charges ?? []) as ExtraCharge[]
 
   // Build items-per-person lookup for item breakdown in summary cards
   const personItems = new Map<string, { id: string; name: string; unit_price: number; quantity: number; share: number }[]>()
@@ -113,6 +116,17 @@ export default async function SummaryPage({ params }: Props) {
         })}
       </div>
 
+      {extraCharges.length > 0 && (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3 text-sm space-y-1">
+          {extraCharges.map((c, i) => (
+            <div key={i} className={`flex justify-between ${c.kind === 'discount' ? 'text-red-500' : 'text-gray-600'}`}>
+              <span>{c.label}</span>
+              <span>{c.kind === 'discount' ? '-' : '+'}฿{Number(c.amount).toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {result.thai_help_amount > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-3 text-sm space-y-1">
           <div className="flex justify-between text-gray-600">
@@ -138,6 +152,16 @@ export default async function SummaryPage({ params }: Props) {
         grandTotal={result.net_payable}
         thaiHelpAmount={result.thai_help_amount}
       />
+
+      <div className="mt-4">
+        <SummaryCharges
+          sessionId={id}
+          foodSubtotal={Number(session.food_subtotal)}
+          deliveryFee={Number(session.delivery_fee)}
+          totalDiscount={Number(session.total_discount)}
+          initialCharges={extraCharges}
+        />
+      </div>
 
       <div className="mt-4 flex gap-3">
         <Link
