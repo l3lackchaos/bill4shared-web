@@ -30,7 +30,7 @@ export default function CopyButton({
       toast('คัดลอกสรุปแล้ว — วางในแชทได้เลย')
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast('คัดลอกไม่สำเร็จ', 'error')
+      toast('คัดลอกไม่สำเร็จ', { kind: 'error' })
     }
   }
 

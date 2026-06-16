@@ -78,7 +78,7 @@ export default function SummaryCharges({
       toast('บันทึกแล้ว คำนวณใหม่ให้แล้ว')
       router.refresh() // re-run the server component so totals recompute
     } else {
-      toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง', 'error')
+      toast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง', { kind: 'error' })
     }
   }
 

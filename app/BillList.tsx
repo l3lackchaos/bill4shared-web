@@ -44,22 +44,38 @@ export default function BillList({ sessions }: { sessions: BillSession[] }) {
   const [status, setStatus] = useState('all')
   const [page, setPage] = useState(1)
   const [confirmId, setConfirmId] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
   // Locally hide rows already deleted this session so the list updates instantly.
   const [removed, setRemoved] = useState<Set<string>>(new Set())
 
-  async function deleteBill(id: string) {
-    setDeletingId(id)
-    const res = await fetch(`/api/sessions/${id}`, { method: 'DELETE' })
-    if (res.ok) {
-      setRemoved(prev => new Set(prev).add(id))
-      setConfirmId(null)
-      toast('ลบบิลแล้ว')
-      router.refresh() // re-sync from server in the background
-    } else {
-      toast('ลบไม่สำเร็จ ลองใหม่อีกครั้ง', 'error')
-    }
-    setDeletingId(null)
+  function deleteBill(id: string) {
+    // Optimistic: hide immediately and offer undo. The real DELETE only fires
+    // after the grace window, so "เลิกทำ" can cancel it before anything is lost.
+    setConfirmId(null)
+    setRemoved(prev => new Set(prev).add(id))
+
+    let undone = false
+    const timer = setTimeout(async () => {
+      if (undone) return
+      const res = await fetch(`/api/sessions/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        router.refresh()
+      } else {
+        // restore the row on failure
+        setRemoved(prev => { const next = new Set(prev); next.delete(id); return next })
+        toast('ลบไม่สำเร็จ ลองใหม่อีกครั้ง', { kind: 'error' })
+      }
+    }, 4500)
+
+    toast('ลบบิลแล้ว', {
+      action: {
+        label: 'เลิกทำ',
+        onClick: () => {
+          undone = true
+          clearTimeout(timer)
+          setRemoved(prev => { const next = new Set(prev); next.delete(id); return next })
+        },
+      },
+    })
   }
 
   // Filter by status + free-text (date label or amount). Reset to page 1 whenever
@@ -135,10 +151,9 @@ export default function BillList({ sessions }: { sessions: BillSession[] }) {
                       <button
                         type="button"
                         onClick={() => deleteBill(s.id)}
-                        disabled={deletingId === s.id}
-                        className="px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--neg)] text-white disabled:opacity-50 active:scale-95 transition-all"
+                        className="px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--neg)] text-white active:scale-95 transition-all"
                       >
-                        {deletingId === s.id ? 'กำลังลบ...' : 'ลบ'}
+                        ลบ
                       </button>
                       <button
                         type="button"

@@ -3,15 +3,22 @@
 import { createContext, useCallback, useContext, useState } from 'react'
 
 type ToastKind = 'success' | 'error' | 'info'
+interface ToastAction {
+  label: string
+  onClick: () => void
+}
 interface Toast {
   id: number
   message: string
   kind: ToastKind
+  action?: ToastAction
 }
 
-const ToastContext = createContext<(message: string, kind?: ToastKind) => void>(() => {})
+type ToastFn = (message: string, opts?: { kind?: ToastKind; action?: ToastAction; duration?: number }) => void
 
-// useToast() returns a function: toast('บันทึกแล้ว') / toast('ผิดพลาด', 'error')
+const ToastContext = createContext<ToastFn>(() => {})
+
+// useToast(): toast('บันทึกแล้ว') | toast('ลบแล้ว', { action: { label: 'เลิกทำ', onClick } })
 export function useToast() {
   return useContext(ToastContext)
 }
@@ -21,11 +28,11 @@ let nextId = 1
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const toast = useCallback((message: string, kind: ToastKind = 'success') => {
+  const toast = useCallback<ToastFn>((message, opts = {}) => {
     const id = nextId++
-    setToasts(prev => [...prev, { id, message, kind }])
-    // Auto-dismiss after 2.6s
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 2600)
+    const { kind = 'success', action, duration = action ? 5000 : 2600 } = opts
+    setToasts(prev => [...prev, { id, message, kind, action }])
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration)
   }, [])
 
   return (
@@ -61,6 +68,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               )}
             </span>
             <span className="text-ink">{t.message}</span>
+            {t.action && (
+              <button
+                type="button"
+                onClick={() => {
+                  t.action!.onClick()
+                  setToasts(prev => prev.filter(x => x.id !== t.id))
+                }}
+                className="ml-1 shrink-0 text-[var(--brand-strong)] font-semibold hover:underline"
+              >
+                {t.action.label}
+              </button>
+            )}
           </div>
         ))}
       </div>

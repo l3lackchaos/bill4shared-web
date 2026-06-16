@@ -20,16 +20,24 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'No images provided' }, { status: 400 })
   }
 
-  const parsed: ParsedBill[] = []
-  for (const file of files) {
-    const bytes = await file.arrayBuffer()
-    const base64 = Buffer.from(bytes).toString('base64')
-    const mime = (file.type || 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/webp'
-    const result = await parseReceiptImage(base64, mime)
-    parsed.push(result)
+  // OCR can fail (model error, unparseable image, rate limit). Catch it and
+  // return 500 with a message instead of letting the route throw a raw 500 so
+  // the client can show a friendly retry prompt.
+  let bill: ParsedBill
+  try {
+    const parsed: ParsedBill[] = []
+    for (const file of files) {
+      const bytes = await file.arrayBuffer()
+      const base64 = Buffer.from(bytes).toString('base64')
+      const mime = (file.type || 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/webp'
+      parsed.push(await parseReceiptImage(base64, mime))
+    }
+    bill = mergeParsedBills(parsed)
+  } catch (e) {
+    console.error('OCR failed:', e)
+    return NextResponse.json({ error: 'OCR failed' }, { status: 500 })
   }
 
-  const bill = mergeParsedBills(parsed)
   const db = createServerClient()
 
   // Update session with parsed totals and raw OCR data

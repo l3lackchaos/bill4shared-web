@@ -37,12 +37,21 @@ export default function UploadPage() {
       files.forEach(f => form.append('images', f))
       const res = await fetch(`/api/sessions/${id}/upload`, { method: 'POST', body: form })
       if (!res.ok) {
-        const d = await res.json()
-        throw new Error(d.error ?? 'Upload failed')
+        // Map server/OCR failures to a friendly, actionable Thai message.
+        const msg =
+          res.status >= 500
+            ? 'อ่านบิลไม่สำเร็จ — รูปอาจไม่ชัดหรือระบบขัดข้อง ลองถ่ายใหม่ให้เห็นรายการชัดๆ แล้วลองอีกครั้ง'
+            : 'อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง'
+        throw new Error(msg)
       }
       router.push(`/session/${id}/confirm`)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'เกิดข้อผิดพลาด')
+      const offline = typeof navigator !== 'undefined' && !navigator.onLine
+      setError(
+        offline
+          ? 'ไม่มีการเชื่อมต่ออินเทอร์เน็ต ตรวจสอบสัญญาณแล้วลองใหม่'
+          : e instanceof Error ? e.message : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง',
+      )
       setLoading(false)
     }
   }
