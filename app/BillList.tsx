@@ -32,6 +32,18 @@ const FILTERS: { key: string; label: string }[] = [
 
 const PAGE_SIZE = 8
 
+// Link straight to the right sub-page by status, skipping the /session/[id]
+// redirect hop (which would run an extra DB query just to decide the route).
+function destFor(s: BillSession): string {
+  switch (s.status) {
+    case 'collecting': return `/session/${s.id}/upload`
+    case 'confirming': return `/session/${s.id}/confirm`
+    case 'assigning': return `/session/${s.id}/assign`
+    case 'done': return `/session/${s.id}/summary`
+    default: return `/session/${s.id}`
+  }
+}
+
 function billLabel(s: BillSession): string {
   const d = new Date(s.created_at)
   return `บิล ${d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}`
@@ -167,7 +179,8 @@ export default function BillList({ sessions }: { sessions: BillSession[] }) {
                 ) : (
                   <>
                     <Link
-                      href={`/session/${s.id}`}
+                      href={destFor(s)}
+                      prefetch={false}
                       className="flex items-center justify-between bg-surface rounded-3xl border border-line pl-4 pr-12 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 card-lift"
                     >
                       <div className="min-w-0">
