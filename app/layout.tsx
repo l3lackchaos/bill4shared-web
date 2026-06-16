@@ -44,8 +44,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th" className="light" style={{ colorScheme: "light" }}>
+    <html lang="th" suppressHydrationWarning>
       <head>
+        {/*
+          Set the theme class before first paint to avoid a flash of the wrong
+          theme. Reads the saved choice, falling back to the OS preference.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`,
+          }}
+        />
         {/*
           Google AdSense Auto ads loader. Plain async <script> (NOT next/script)
           so it has no data-nscript attribute — Auto ads' tag detection requires
@@ -59,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           crossOrigin="anonymous"
         />
       </head>
-      <body className={`${geist.className} bg-gray-50 text-gray-900 min-h-screen`}>
+      <body className={`${geist.className} bg-canvas text-ink min-h-screen`}>
         {children}
       </body>
     </html>

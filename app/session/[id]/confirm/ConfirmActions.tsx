@@ -131,15 +131,15 @@ export default function ConfirmActions({
 
   return (
     <div className="space-y-4">
-      <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 space-y-2 text-sm">
+      <div className="bg-canvas rounded-xl border border-line px-4 py-3 space-y-2 text-sm">
         {foodSubtotal > 0 && (
-          <div className="flex justify-between text-gray-600">
+          <div className="flex justify-between text-ink-soft">
             <span>ค่าอาหาร</span>
             <span>฿{foodSubtotal.toFixed(2)}</span>
           </div>
         )}
 
-        <div className="flex justify-between items-center text-gray-600">
+        <div className="flex justify-between items-center text-ink-soft">
           <span>ค่าจัดส่ง</span>
           <div className="flex items-center gap-1">
             <span>฿</span>
@@ -148,7 +148,7 @@ export default function ConfirmActions({
               inputMode="decimal"
               value={delivery}
               onChange={e => setDelivery(num(e.target.value))}
-              className="w-20 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+              className="w-20 text-right border border-line rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function ConfirmActions({
                 setDiscount(num(e.target.value))
                 setGrandOverride(null) // re-sync grand total when discount changes
               }}
-              className="w-20 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+              className="w-20 text-right border border-line rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
           </div>
         </div>
@@ -178,9 +178,9 @@ export default function ConfirmActions({
               value={c.label}
               placeholder={c.kind === 'fee' ? 'ชื่อค่าบริการ' : 'ชื่อส่วนลด'}
               onChange={e => updateCharge(i, { label: e.target.value })}
-              className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+              className="flex-1 min-w-0 border border-line rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
-            <div className={`flex items-center gap-1 ${c.kind === 'discount' ? 'text-red-600' : 'text-gray-600'}`}>
+            <div className={`flex items-center gap-1 ${c.kind === 'discount' ? 'text-red-600' : 'text-ink-soft'}`}>
               <span>{c.kind === 'discount' ? '-฿' : '฿'}</span>
               <input
                 type="number"
@@ -188,14 +188,14 @@ export default function ConfirmActions({
                 value={c.amount || ''}
                 placeholder="0"
                 onChange={e => updateCharge(i, { amount: num(e.target.value) })}
-                className="w-16 text-right border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+                className="w-16 text-right border border-line rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
               />
             </div>
             <button
               type="button"
               onClick={() => removeCharge(i)}
               aria-label={`ลบ ${c.label || (c.kind === 'fee' ? 'ค่าบริการ' : 'ส่วนลด')}`}
-              className="text-gray-300 hover:text-red-500 w-7 h-7 flex items-center justify-center shrink-0 transition-colors"
+              className="text-ink-faint hover:text-red-500 w-7 h-7 flex items-center justify-center shrink-0 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -221,7 +221,7 @@ export default function ConfirmActions({
           </button>
         </div>
 
-        <div className="flex justify-between items-center font-semibold text-gray-900 pt-2 border-t border-gray-200">
+        <div className="flex justify-between items-center font-semibold text-ink pt-2 border-t border-line">
           <span>รวมทั้งหมด</span>
           <div className="flex items-center gap-1">
             <span>฿</span>
@@ -230,18 +230,18 @@ export default function ConfirmActions({
               inputMode="decimal"
               value={grand}
               onChange={e => setGrandOverride(num(e.target.value))}
-              className="w-24 text-right border border-gray-200 rounded px-2 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+              className="w-24 text-right border border-line rounded px-2 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
             />
           </div>
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">โหมดแบ่งบิล</label>
+        <label className="block text-xs font-medium text-ink-soft mb-1.5">โหมดแบ่งบิล</label>
         <select
           value={mode}
           onChange={e => setMode(Number(e.target.value))}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+          className="w-full border border-line rounded-lg px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
         >
           {MODE_OPTIONS.map(o => (
             <option key={o.mode} value={o.mode}>{o.label}</option>
@@ -265,7 +265,7 @@ export default function ConfirmActions({
             aria-label="เปิดใช้ไทยช่วยไทย"
             onChange={e => setThaiHelp(e.target.checked)}
             className="h-6 w-11 shrink-0 appearance-none rounded-full bg-gray-300 checked:bg-amber-500 relative cursor-pointer transition-colors
-              before:absolute before:top-0.5 before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform checked:before:translate-x-5"
+              before:absolute before:top-0.5 before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-surface before:shadow before:transition-transform checked:before:translate-x-5"
           />
         </label>
 
@@ -281,7 +281,7 @@ export default function ConfirmActions({
                   value={balance}
                   onChange={e => setBalance(num(e.target.value))}
                   placeholder="0"
-                  className="w-24 text-right border border-amber-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-amber-400"
+                  className="w-24 text-right border border-amber-300 rounded px-2 py-1 bg-surface focus:outline-none focus:ring-1 focus:ring-amber-400"
                 />
               </div>
             </div>
@@ -309,7 +309,7 @@ export default function ConfirmActions({
       </button>
       <Link
         href={`/session/${sessionId}/upload`}
-        className="block text-center text-sm text-gray-500 hover:text-gray-700"
+        className="block text-center text-sm text-ink-soft hover:text-ink-soft"
       >
         อัปโหลดรูปใหม่
       </Link>

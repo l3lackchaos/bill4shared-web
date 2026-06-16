@@ -64,7 +64,7 @@ export default function UploadPage() {
         aria-label="เลือกหรือลากรูปบิลมาวางเพื่ออัปโหลด"
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); addFiles([...e.dataTransfer.files]) }}
-        className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/40 transition-colors"
+        className="border-2 border-dashed border-line rounded-xl p-8 text-center cursor-pointer hover:border-[var(--brand)] hover:bg-brand-tint/50 transition-colors"
         onClick={() => document.getElementById('file-input')?.click()}
         onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -73,11 +73,11 @@ export default function UploadPage() {
           }
         }}
       >
-        <svg className="w-9 h-9 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+        <svg className="w-9 h-9 mx-auto mb-2 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M18 14.25h.008v.008H18v-.008z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75A2.25 2.25 0 014.5 4.5h15a2.25 2.25 0 012.25 2.25v10.5A2.25 2.25 0 0119.5 19.5h-15A2.25 2.25 0 012.25 17.25V6.75z" />
         </svg>
-        <p className="text-sm text-gray-600">ลากรูปมาวาง หรือแตะเพื่อเลือก</p>
+        <p className="text-sm text-ink-soft">ลากรูปมาวาง หรือแตะเพื่อเลือก</p>
         <input
           id="file-input"
           type="file"
@@ -93,7 +93,7 @@ export default function UploadPage() {
           {previews.map((src, i) => (
             <li key={i} className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={`รูปบิลที่ ${i + 1}`} className="w-full h-32 object-cover rounded-lg border border-gray-200" />
+              <img src={src} alt={`รูปบิลที่ ${i + 1}`} className="w-full h-32 object-cover rounded-lg border border-line" />
               <button
                 type="button"
                 onClick={() => removeFile(i)}

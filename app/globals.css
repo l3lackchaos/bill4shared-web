@@ -57,6 +57,37 @@
   --foreground: var(--ink);
 }
 
+/*
+ * Dark theme. Applied when <html> has class="dark" (set by the inline script in
+ * layout before paint, then by ThemeToggle). Brand stays emerald but lifts a bit
+ * for contrast on dark surfaces; the neutral ramp inverts. Money figures use
+ * --brand which reads clearly on the dark card.
+ */
+.dark {
+  color-scheme: dark;
+
+  --brand: oklch(0.72 0.13 168);
+  --brand-strong: oklch(0.8 0.12 168);
+  --brand-tint: oklch(0.32 0.05 168);
+  --brand-ink: oklch(0.88 0.06 168);
+
+  --canvas: oklch(0.17 0.01 260); /* page bg */
+  --surface: oklch(0.22 0.012 260); /* cards */
+  --ink: oklch(0.96 0.005 260);
+  --ink-soft: oklch(0.76 0.008 260);
+  --ink-faint: oklch(0.62 0.008 260);
+  --line: oklch(0.3 0.01 260);
+
+  --pos: oklch(0.74 0.13 150);
+  --neg: oklch(0.7 0.16 25);
+  --warn: oklch(0.8 0.12 75);
+  --warn-tint: oklch(0.32 0.05 80);
+
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 2px 4px oklch(0 0 0 / 0.3), 0 4px 12px oklch(0 0 0 / 0.35);
+  --shadow-lg: 0 8px 24px oklch(0 0 0 / 0.45);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

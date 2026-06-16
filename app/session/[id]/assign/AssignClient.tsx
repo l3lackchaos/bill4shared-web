@@ -199,11 +199,11 @@ export default function AssignClient({
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">
+      <Link href="/" className="text-sm text-ink-soft hover:text-ink-soft mb-6 inline-block">
         ← กลับหน้าแรก
       </Link>
-      <h1 className="text-xl font-bold text-gray-900 mb-1">แบ่งรายการ</h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <h1 className="text-xl font-bold text-ink mb-1">แบ่งรายการ</h1>
+      <p className="text-sm text-ink-soft mb-6">
         ระบุชื่อคนที่สั่งแต่ละรายการ — หารเท่ากัน หรือระบุราคาเองก็ได้
       </p>
 
@@ -216,20 +216,20 @@ export default function AssignClient({
           const mismatch = m === 'custom' && list.length > 0 && Math.abs(customSum - itemTotal) > 0.01
 
           return (
-            <div key={item.id} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={item.id} className="bg-surface rounded-xl border border-line p-4">
               <div className="flex justify-between items-start mb-3">
-                <p className="font-medium text-gray-800 text-sm">{item.name}</p>
-                <p className="text-sm font-semibold text-gray-900">฿{itemTotal.toFixed(2)}</p>
+                <p className="font-medium text-ink text-sm">{item.name}</p>
+                <p className="text-sm font-semibold text-ink">฿{itemTotal.toFixed(2)}</p>
               </div>
 
               {/* mode toggle */}
-              <div className="inline-flex rounded-lg border border-gray-200 p-0.5 mb-3 text-xs">
+              <div className="inline-flex rounded-lg border border-line p-0.5 mb-3 text-xs">
                 {(['equal', 'custom'] as const).map(opt => (
                   <button
                     key={opt}
                     onClick={() => setMode(prev => ({ ...prev, [item.id]: opt }))}
                     className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                      m === opt ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:text-gray-700'
+                      m === opt ? 'bg-[var(--brand)] text-white' : 'text-ink-soft hover:text-ink'
                     }`}
                   >
                     {opt === 'equal' ? 'หารเท่ากัน' : 'ระบุราคา'}
@@ -239,7 +239,7 @@ export default function AssignClient({
 
               {/* Equal mode + nobody picked → auto split among everyone (roster) */}
               {list.length === 0 && m === 'equal' && roster.length > 0 && (
-                <p className="text-xs text-gray-400 mb-2">
+                <p className="text-xs text-ink-faint mb-2">
                   หารเท่ากันทุกคน ({roster.length} คน) — คนละ ฿{equalAmount(item.id).toFixed(2)}
                 </p>
               )}
@@ -248,19 +248,19 @@ export default function AssignClient({
                 <div className="space-y-1.5 mb-2">
                   {list.map(p => (
                     <div key={p.name} className="flex items-center gap-2">
-                      <span className="flex-1 text-sm text-gray-700">{p.name}</span>
+                      <span className="flex-1 text-sm text-ink-soft">{p.name}</span>
                       {m === 'equal' ? (
-                        <span className="text-xs text-gray-400">฿{equalAmount(item.id).toFixed(2)}</span>
+                        <span className="text-xs text-ink-faint">฿{equalAmount(item.id).toFixed(2)}</span>
                       ) : (
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-400">฿</span>
+                          <span className="text-xs text-ink-faint">฿</span>
                           <input
                             type="number"
                             inputMode="decimal"
                             value={p.amount || ''}
                             placeholder="0"
                             onChange={e => setPersonAmount(item.id, p.name, num(e.target.value))}
-                            className="w-20 text-right border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+                            className="w-20 text-right border border-line rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
                           />
                         </div>
                       )}
@@ -268,7 +268,7 @@ export default function AssignClient({
                         type="button"
                         onClick={() => removePerson(item.id, p.name)}
                         aria-label={`ลบ ${p.name} ออกจาก ${item.name}`}
-                        className="text-gray-300 hover:text-red-500 w-7 h-7 flex items-center justify-center shrink-0 transition-colors"
+                        className="text-ink-faint hover:text-red-500 w-7 h-7 flex items-center justify-center shrink-0 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -278,7 +278,7 @@ export default function AssignClient({
                   ))}
 
                   {m === 'custom' && (
-                    <div className={`flex justify-between text-xs pt-1.5 mt-1 border-t border-gray-100 ${mismatch ? 'text-amber-600' : 'text-gray-400'}`}>
+                    <div className={`flex justify-between text-xs pt-1.5 mt-1 border-t border-line ${mismatch ? 'text-amber-600' : 'text-ink-faint'}`}>
                       <span>รวมที่ระบุ</span>
                       <span>
                         ฿{customSum.toFixed(2)} / ฿{itemTotal.toFixed(2)}
@@ -302,9 +302,9 @@ export default function AssignClient({
                           <button
                             key={nm}
                             onClick={() => addNamed(item.id, nm)}
-                            className="inline-flex items-center gap-1 bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 text-xs px-2 py-1 rounded-full transition-colors"
+                            className="inline-flex items-center gap-1 bg-canvas hover:bg-brand-tint text-ink-soft hover:text-brand-ink text-xs px-2 py-1 rounded-full transition-colors"
                           >
-                            <span className="text-indigo-400">+</span> {nm}
+                            <span className="text-[var(--brand)]">+</span> {nm}
                           </button>
                         ))}
                       </div>
@@ -322,7 +322,7 @@ export default function AssignClient({
                         if (e.key === 'Enter') addPerson(item.id)
                         if (e.key === 'Escape') setAdding(prev => ({ ...prev, [item.id]: false }))
                       }}
-                      className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+                      className="flex-1 border border-line rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
                     />
                     <button
                       onClick={() => addPerson(item.id)}
@@ -332,7 +332,7 @@ export default function AssignClient({
                     </button>
                     <button
                       onClick={() => setAdding(prev => ({ ...prev, [item.id]: false }))}
-                      className="text-gray-400 hover:text-gray-600 px-1 text-xs"
+                      className="text-ink-faint hover:text-ink-soft px-1 text-xs"
                     >
                       เสร็จ
                     </button>
@@ -351,9 +351,9 @@ export default function AssignClient({
         })}
       </div>
 
-      <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 text-sm mb-6 space-y-1">
+      <div className="bg-canvas rounded-xl border border-line px-4 py-3 text-sm mb-6 space-y-1">
         {session.delivery_fee > 0 && (
-          <div className="flex justify-between text-gray-500">
+          <div className="flex justify-between text-ink-soft">
             <span>ค่าจัดส่ง</span><span>฿{Number(session.delivery_fee).toFixed(2)}</span>
           </div>
         )}
@@ -362,7 +362,7 @@ export default function AssignClient({
             <span>ส่วนลด</span><span>-฿{Number(session.total_discount).toFixed(2)}</span>
           </div>
         )}
-        <div className="flex justify-between font-semibold text-gray-900 pt-1 border-t border-gray-200">
+        <div className="flex justify-between font-semibold text-ink pt-1 border-t border-line">
           <span>รวม</span><span>฿{Number(session.grand_total).toFixed(2)}</span>
         </div>
       </div>
