@@ -1,23 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
 type Theme = 'light' | 'dark'
 
-// The inline script in layout already set the .dark class before paint, so we
-// read the current theme straight from the DOM as the lazy initial state — no
-// effect, no flash, no cascading render.
-function currentTheme(): Theme {
-  if (typeof document === 'undefined') return 'light'
+// The inline script in layout sets the .dark class before paint. The toggle's
+// icon must reflect that real DOM state — not the server's guess. useSyncExternal
+// Store reads the live DOM (client) with a 'light' server snapshot, and React
+// reconciles after hydration without a mismatch warning or a flash.
+function subscribe(onChange: () => void) {
+  const observer = new MutationObserver(onChange)
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  return () => observer.disconnect()
+}
+function getSnapshot(): Theme {
   return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+}
+function getServerSnapshot(): Theme {
+  return 'light'
 }
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(currentTheme)
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  const isDark = theme === 'dark'
 
   function toggle() {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark'
-    setTheme(next)
+    const next: Theme = isDark ? 'light' : 'dark'
+    // Updating the class triggers the MutationObserver above, which re-renders.
     document.documentElement.classList.toggle('dark', next === 'dark')
     try {
       localStorage.setItem('theme', next)
@@ -25,8 +34,6 @@ export default function ThemeToggle() {
       // private mode / storage disabled — theme still applies for this session
     }
   }
-
-  const isDark = theme === 'dark'
 
   return (
     <button
