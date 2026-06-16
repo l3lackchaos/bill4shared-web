@@ -1,28 +1,11 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase-server'
 import type { BillSession } from '@/types'
+import BillList from './BillList'
 
 // Render per-request: this page lists live sessions from Supabase, so it must
 // not be prerendered at build time (env vars aren't present then → build fails).
 export const dynamic = 'force-dynamic'
-
-const STATUS_LABEL: Record<string, string> = {
-  collecting: 'กำลังรับรูป',
-  confirming: 'รอยืนยัน',
-  assigning: 'แบ่งรายการ',
-  done: 'เสร็จสิ้น',
-  cancelled: 'ยกเลิก',
-}
-
-// Status dots — color carries meaning but is paired with a text label (not
-// color-only), so it stays accessible.
-const STATUS_DOT: Record<string, string> = {
-  collecting: 'bg-sky-500',
-  confirming: 'bg-amber-500',
-  assigning: 'bg-orange-500',
-  done: 'bg-[var(--brand)]',
-  cancelled: 'bg-gray-400',
-}
 
 async function getSessions(): Promise<BillSession[]> {
   const db = createServerClient()
@@ -30,7 +13,7 @@ async function getSessions(): Promise<BillSession[]> {
     .from('sessions')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(50)
+    .limit(200)
   return (data ?? []) as BillSession[]
 }
 
@@ -80,36 +63,7 @@ export default async function HomePage() {
           </Link>
         </div>
       ) : (
-        <ul className="space-y-2.5 list-none p-0">
-          {sessions.map((s, i) => (
-            <li key={s.id} className="rise" style={{ animationDelay: `${Math.min(i * 40, 320)}ms` }}>
-              <Link
-                href={`/session/${s.id}`}
-                className="group flex items-center justify-between bg-surface rounded-2xl border border-line px-4 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 card-lift"
-              >
-                <div className="min-w-0">
-                  <p className="font-semibold text-ink text-sm">
-                    บิล {new Date(s.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
-                  </p>
-                  <p className="flex items-center gap-1.5 text-xs text-ink-faint mt-0.5">
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT[s.status] ?? 'bg-gray-400'}`} aria-hidden="true" />
-                    {STATUS_LABEL[s.status] ?? s.status}
-                    <span className="text-line">·</span>
-                    {new Date(s.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="tnum text-lg font-bold text-ink">
-                    {s.grand_total > 0 ? `฿${s.grand_total.toFixed(0)}` : '—'}
-                  </span>
-                  <svg className="w-4 h-4 text-ink-faint group-hover:text-[var(--brand)] group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <BillList sessions={sessions} />
       )}
     </div>
   )
