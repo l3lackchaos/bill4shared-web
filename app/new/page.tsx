@@ -32,7 +32,7 @@ export default function NewSessionPage() {
       <p className="text-sm text-ink-faint mb-7">เลือกวิธีแบ่งค่าส่งและส่วนลด</p>
 
       <fieldset className="space-y-2.5 border-0 p-0 m-0">
-        <legend className="text-xs font-semibold text-ink-soft uppercase tracking-wide mb-2">โหมดแบ่งบิล</legend>
+        <legend className="text-sm font-semibold text-ink mb-2">โหมดแบ่งบิล</legend>
         {[
           { mode: 1 as const, label: 'ตามสัดส่วน', desc: 'ค่าส่ง + ส่วนลด ตาม % อาหาร' },
           { mode: 2 as const, label: 'ผสม', desc: 'ค่าส่งหารเท่ากัน, ส่วนลดตาม % อาหาร', rec: true },
@@ -62,7 +62,7 @@ export default function NewSessionPage() {
               <span className="flex-1">
                 <span className="flex items-center gap-2">
                   <span className={`text-sm font-semibold ${active ? 'text-brand-ink' : 'text-ink'}`}>{label}</span>
-                  {rec && <span className="text-[10px] font-bold uppercase tracking-wide bg-[var(--brand)] text-white px-1.5 py-0.5 rounded-full">แนะนำ</span>}
+                  {rec && <span className="text-[11px] font-semibold bg-[var(--brand)] text-white px-2 py-0.5 rounded-full">แนะนำ</span>}
                 </span>
                 <span className="block text-xs text-ink-faint mt-0.5">{desc}</span>
               </span>

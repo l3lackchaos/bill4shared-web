@@ -216,7 +216,7 @@ export default function AssignClient({
       </Link>
       <h1 className="text-2xl font-bold text-ink mb-1">แบ่งรายการ</h1>
       <p className="text-sm text-ink-faint mb-7">
-        ระบุชื่อคนที่สั่งแต่ละรายการ — หารเท่ากัน หรือระบุราคาเองก็ได้
+        ระบุชื่อคนที่สั่งแต่ละรายการ หารเท่ากันหรือระบุราคาเองก็ได้
       </p>
 
       <div className="space-y-3 mb-6">
