@@ -92,7 +92,7 @@ export default async function ConfirmPage({ params }: Props) {
             const personItems = personGroups.get(name)!
             const subtotal = personItems.reduce((s, i) => s + i.unit_price * i.quantity, 0)
             return (
-              <div key={name} className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden">
+              <div key={name} className="bg-surface rounded-3xl border border-line shadow-[var(--shadow-sm)] overflow-hidden">
                 <div className="flex justify-between items-center px-4 py-2 bg-brand-tint border-b border-line">
                   <p className="text-sm font-semibold text-brand-ink">{name}</p>
                   <p className="text-xs font-medium text-brand-strong">฿{subtotal.toFixed(2)}</p>
@@ -104,7 +104,7 @@ export default async function ConfirmPage({ params }: Props) {
             )
           })}
           {unassigned.length > 0 && (
-            <div className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden">
+            <div className="bg-surface rounded-3xl border border-line shadow-[var(--shadow-sm)] overflow-hidden">
               <div className="px-4 py-2 bg-canvas border-b border-line">
                 <p className="text-sm font-semibold text-ink-soft">ไม่ระบุ</p>
               </div>
@@ -115,7 +115,7 @@ export default async function ConfirmPage({ params }: Props) {
           )}
         </div>
       ) : (
-        <div className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] divide-y divide-line mb-4">
+        <div className="bg-surface rounded-3xl border border-line shadow-[var(--shadow-sm)] divide-y divide-line mb-4">
           {typedItems.map(item => (
             <div key={item.id} className="flex justify-between items-center px-4 py-3">
               <div>

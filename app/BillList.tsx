@@ -145,7 +145,7 @@ export default function BillList({ sessions }: { sessions: BillSession[] }) {
             {pageItems.map((s, i) => (
               <li key={s.id} className="rise relative group" style={{ animationDelay: `${Math.min(i * 35, 280)}ms` }}>
                 {confirmId === s.id ? (
-                  <div className="flex items-center justify-between bg-surface rounded-2xl border border-[var(--neg)]/40 px-4 py-3.5 shadow-[var(--shadow-sm)]">
+                  <div className="flex items-center justify-between bg-surface rounded-3xl border border-[var(--neg)]/40 px-4 py-3.5 shadow-[var(--shadow-sm)]">
                     <span className="text-sm text-ink">ลบบิลนี้?</span>
                     <div className="flex items-center gap-2">
                       <button
@@ -168,7 +168,7 @@ export default function BillList({ sessions }: { sessions: BillSession[] }) {
                   <>
                     <Link
                       href={`/session/${s.id}`}
-                      className="flex items-center justify-between bg-surface rounded-2xl border border-line pl-4 pr-12 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 card-lift"
+                      className="flex items-center justify-between bg-surface rounded-3xl border border-line pl-4 pr-12 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 card-lift"
                     >
                       <div className="min-w-0">
                         <p className="font-semibold text-ink text-sm">{billLabel(s)}</p>

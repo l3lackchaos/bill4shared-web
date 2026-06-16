@@ -47,12 +47,13 @@
   --warn: oklch(0.7 0.13 75); /* warnings (amber) */
   --warn-tint: oklch(0.96 0.04 85);
 
-  /* Tuned shadows — soft, layered, brand-tinted (not pure black) */
-  --shadow-sm: 0 1px 2px oklch(0.4 0.03 200 / 0.06), 0 1px 1px oklch(0.4 0.03 200 / 0.04);
-  --shadow-md: 0 2px 4px oklch(0.4 0.03 200 / 0.06), 0 4px 12px oklch(0.4 0.03 200 / 0.08);
-  --shadow-lg: 0 8px 24px oklch(0.4 0.03 200 / 0.12);
+  /* Claymorphism shadows — soft chunky depth: a lifted outer drop + a faint
+     top inner highlight so surfaces look like soft clay, not flat cards. */
+  --shadow-sm: 0 2px 4px oklch(0.45 0.04 200 / 0.08), inset 0 1px 0 oklch(1 0 0 / 0.5);
+  --shadow-md: 0 6px 14px oklch(0.45 0.05 200 / 0.12), inset 0 1px 0 oklch(1 0 0 / 0.55);
+  --shadow-lg: 0 14px 30px oklch(0.45 0.06 200 / 0.16), inset 0 1px 0 oklch(1 0 0 / 0.5);
 
-  --radius: 14px;
+  --radius: 22px; /* chunky, toy-like rounding */
 
   /* Semantic z-index scale */
   --z-dropdown: 10;
@@ -94,9 +95,10 @@
   --warn: oklch(0.8 0.12 75);
   --warn-tint: oklch(0.32 0.05 80);
 
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
-  --shadow-md: 0 2px 4px oklch(0 0 0 / 0.3), 0 4px 12px oklch(0 0 0 / 0.35);
-  --shadow-lg: 0 8px 24px oklch(0 0 0 / 0.45);
+  /* Dark clay: deeper drop + a soft top highlight from the surface's own light */
+  --shadow-sm: 0 2px 5px oklch(0 0 0 / 0.4), inset 0 1px 0 oklch(1 0 0 / 0.04);
+  --shadow-md: 0 6px 16px oklch(0 0 0 / 0.45), inset 0 1px 0 oklch(1 0 0 / 0.05);
+  --shadow-lg: 0 14px 32px oklch(0 0 0 / 0.55), inset 0 1px 0 oklch(1 0 0 / 0.05);
 }
 
 @theme inline {
@@ -115,13 +117,15 @@
   --color-pos: var(--pos);
   --color-neg: var(--neg);
   --color-warn: var(--warn);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Friendly type: Nunito body, Fredoka display (with Thai system fallback) */
+  --font-sans: var(--font-body), "IBM Plex Sans Thai", system-ui, sans-serif;
+  --font-display: var(--font-display), "IBM Plex Sans Thai", system-ui, sans-serif;
 }
 
 body {
   background: var(--canvas);
   color: var(--ink);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   /* Two ambient color blooms (teal top-left, green-amber top-right) give the
@@ -150,9 +154,20 @@ body {
   font-feature-settings: "tnum";
 }
 
-/* Even line breaks on headings (impeccable) */
+/* Chunky friendly display font on headings + even line breaks (impeccable) */
 h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
   text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+/* Soft clay press — buttons/cards depress slightly when tapped */
+.clay-press {
+  transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out), filter 0.18s var(--ease-out);
+}
+.clay-press:active {
+  transform: translateY(1px) scale(0.985);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Nunito, Fredoka } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "./ThemeToggle";
 import { ToastProvider } from "./Toast";
 
-const geist = Geist({ subsets: ["latin"] });
+// Friendly type pairing (ui-ux-pro-max): Fredoka for chunky display headings,
+// Nunito for warm, highly readable body. Thai falls back to the system Thai UI
+// font, which pairs cleanly with both.
+const nunito = Nunito({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+const fredoka = Fredoka({ subsets: ["latin"], variable: "--font-display", display: "swap" });
 
 const ADSENSE_CLIENT = "ca-pub-3479386406572719";
 const SITE_URL = "https://www.bill4shared.site";
@@ -46,7 +50,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th" suppressHydrationWarning>
+    <html lang="th" suppressHydrationWarning className={`${nunito.variable} ${fredoka.variable}`}>
       <head>
         {/*
           Set the theme class before first paint to avoid a flash of the wrong
@@ -70,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           crossOrigin="anonymous"
         />
       </head>
-      <body className={`${geist.className} bg-canvas text-ink min-h-screen`}>
+      <body className="bg-canvas text-ink min-h-screen">
         <ToastProvider>
           {children}
           {/* Floating theme switch — available on every page. Bottom-right keeps

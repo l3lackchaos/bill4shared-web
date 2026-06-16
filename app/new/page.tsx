@@ -42,7 +42,7 @@ export default function NewSessionPage() {
           return (
             <label
               key={mode}
-              className={`flex items-center gap-3 rounded-2xl px-4 py-3 cursor-pointer transition-all duration-200 ${
+              className={`flex items-center gap-3 rounded-3xl px-4 py-3 cursor-pointer transition-all duration-200 ${
                 active
                   ? 'bg-brand-tint border-2 border-[var(--brand)] shadow-[var(--shadow-sm)]'
                   : 'bg-surface border-2 border-line hover:border-[var(--brand)]/30'
@@ -75,7 +75,7 @@ export default function NewSessionPage() {
         type="button"
         onClick={create}
         disabled={loading}
-        className="mt-7 w-full inline-flex items-center justify-center gap-2 bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all duration-200"
+        className="mt-7 w-full inline-flex items-center justify-center gap-2 bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 clay-press transition-all duration-200"
       >
         {loading ? 'กำลังสร้าง...' : 'สร้างบิลและอัปโหลดรูป'}
       </button>

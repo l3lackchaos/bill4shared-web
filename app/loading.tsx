@@ -19,7 +19,7 @@ export default function Loading() {
       </div>
       <div className="space-y-2.5">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="skeleton h-[68px] w-full rounded-2xl" />
+          <div key={i} className="skeleton h-[68px] w-full rounded-3xl" />
         ))}
       </div>
     </div>

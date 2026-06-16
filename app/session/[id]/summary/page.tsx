@@ -51,7 +51,7 @@ export default async function SummaryPage({ params }: Props) {
           return (
             <li
               key={p.display_name}
-              className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden rise card-lift"
+              className="bg-surface rounded-3xl border border-line shadow-[var(--shadow-sm)] overflow-hidden rise card-lift"
               style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
             >
               <div className="flex items-center gap-3 px-4 py-3.5">
@@ -92,7 +92,7 @@ export default async function SummaryPage({ params }: Props) {
       </ul>
 
       {extraCharges.length > 0 && (
-        <div className="bg-surface border border-line rounded-2xl px-4 py-3 mb-3 text-sm space-y-1.5 shadow-[var(--shadow-sm)]">
+        <div className="bg-surface border border-line rounded-3xl px-4 py-3 mb-3 text-sm space-y-1.5 shadow-[var(--shadow-sm)]">
           {extraCharges.map((c, i) => (
             <div key={i} className={`flex justify-between ${c.kind === 'discount' ? 'text-[var(--neg)]' : 'text-ink-soft'}`}>
               <span>{c.label}</span>
@@ -103,7 +103,7 @@ export default async function SummaryPage({ params }: Props) {
       )}
 
       {result.thai_help_amount > 0 && (
-        <div className="bg-warn-tint border border-[var(--warn)]/25 rounded-2xl px-4 py-3 mb-3 text-sm space-y-1.5">
+        <div className="bg-warn-tint border border-[var(--warn)]/25 rounded-3xl px-4 py-3 mb-3 text-sm space-y-1.5">
           <div className="flex justify-between text-ink-soft">
             <span>ยอดบิล</span>
             <span className="tnum">฿{Number(session.grand_total).toFixed(2)}</span>
@@ -116,7 +116,7 @@ export default async function SummaryPage({ params }: Props) {
       )}
 
       {/* Grand total — the hero figure of the page */}
-      <div className="rounded-2xl px-5 py-4 mb-7 flex justify-between items-center text-white bg-[image:var(--brand-grad)] glow-brand">
+      <div className="rounded-3xl px-5 py-4 mb-7 flex justify-between items-center text-white bg-[image:var(--brand-grad)] glow-brand">
         <span className="text-sm font-medium opacity-90">
           {result.thai_help_amount > 0 ? 'กลุ่มจ่ายจริง' : 'รวมทั้งหมด'}
         </span>
@@ -152,7 +152,7 @@ export default async function SummaryPage({ params }: Props) {
         </Link>
         <Link
           href="/new"
-          className="flex-1 text-center bg-[image:var(--brand-grad)] text-white py-2.5 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-95 transition-all duration-200"
+          className="flex-1 text-center bg-[image:var(--brand-grad)] text-white py-2.5 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-95 clay-press transition-all duration-200"
         >
           บิลใหม่
         </Link>

@@ -124,7 +124,7 @@ export default function UploadPage() {
         type="button"
         onClick={upload}
         disabled={files.length === 0 || loading}
-        className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 transition-all duration-200"
+        className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 clay-press transition-all duration-200"
       >
         {loading ? 'กำลัง OCR รูปบิล...' : `วิเคราะห์บิล (${files.length} รูป)`}
       </button>

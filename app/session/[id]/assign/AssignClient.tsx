@@ -228,7 +228,7 @@ export default function AssignClient({
           const mismatch = m === 'custom' && list.length > 0 && Math.abs(customSum - itemTotal) > 0.01
 
           return (
-            <div key={item.id} className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] p-4">
+            <div key={item.id} className="bg-surface rounded-3xl border border-line shadow-[var(--shadow-sm)] p-4">
               <div className="flex justify-between items-start mb-3">
                 <p className="font-medium text-ink text-sm">{item.name}</p>
                 <p className="text-sm font-semibold text-ink">฿{itemTotal.toFixed(2)}</p>
@@ -363,7 +363,7 @@ export default function AssignClient({
         })}
       </div>
 
-      <div className="bg-canvas rounded-2xl border border-line px-4 py-3 text-sm mb-6 space-y-2">
+      <div className="bg-canvas rounded-3xl border border-line px-4 py-3 text-sm mb-6 space-y-2">
         {/* Running coverage — how much of the food has been assigned */}
         <div>
           <div className="flex justify-between items-center mb-1.5">
@@ -397,7 +397,7 @@ export default function AssignClient({
       <button
         onClick={finalize}
         disabled={loading || totalAssigned === 0}
-        className="w-full bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 transition-all duration-200"
+        className="w-full bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 clay-press transition-all duration-200"
       >
         {loading ? 'กำลังคำนวณ...' : `คำนวณบิล (${totalAssigned}/${items.length} รายการ)`}
       </button>
