@@ -35,7 +35,7 @@ export default function ThemeToggle() {
       role="switch"
       aria-checked={isDark}
       aria-label={isDark ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด'}
-      className="grid place-items-center w-9 h-9 rounded-xl border border-line bg-surface text-ink-soft hover:text-ink hover:border-[var(--brand)]/40 active:scale-95 transition-all duration-200"
+      className="grid place-items-center w-11 h-11 rounded-full border border-line bg-surface text-ink-soft shadow-[var(--shadow-md)] hover:text-ink hover:border-[var(--brand)]/40 active:scale-95 transition-all duration-200"
     >
       {isDark ? (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">

@@ -113,6 +113,21 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Soft ambient brand glow anchored top-center — gives the flat canvas depth
+     without a heavy gradient. Subtle in light, a touch more present in dark. */
+  background-image: radial-gradient(
+    120% 60% at 50% -10%,
+    oklch(0.62 0.13 168 / 0.07),
+    transparent 60%
+  );
+  background-attachment: fixed;
+}
+.dark body {
+  background-image: radial-gradient(
+    120% 60% at 50% -10%,
+    oklch(0.72 0.13 168 / 0.1),
+    transparent 55%
+  );
 }
 
 /* Keyboard-only focus ring */
@@ -146,4 +161,22 @@ body {
 }
 .rise {
   animation: rise 0.4s var(--ease-out) both;
+}
+
+/* Card that lifts slightly on hover — pointer feedback without layout shift */
+.card-lift {
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+@media (hover: hover) {
+  .card-lift:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Brand-tinted glow for the hero total card */
+.glow-brand {
+  box-shadow: 0 8px 24px oklch(0.62 0.13 168 / 0.28), 0 2px 6px oklch(0.62 0.13 168 / 0.2);
+}
+.dark .glow-brand {
+  box-shadow: 0 8px 28px oklch(0.62 0.16 168 / 0.4);
 }

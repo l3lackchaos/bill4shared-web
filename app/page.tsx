@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase-server'
 import type { BillSession } from '@/types'
-import ThemeToggle from './ThemeToggle'
 
 // Render per-request: this page lists live sessions from Supabase, so it must
 // not be prerendered at build time (env vars aren't present then → build fails).
@@ -53,18 +52,15 @@ export default async function HomePage() {
             <p className="text-ink-faint text-xs">แตกบิลง่ายๆ จากรูปใบเสร็จ</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Link
-            href="/new"
-            className="inline-flex items-center gap-1.5 bg-[var(--brand)] text-white pl-3 pr-4 py-2 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-95 transition-all duration-200"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            บิลใหม่
-          </Link>
-        </div>
+        <Link
+          href="/new"
+          className="inline-flex items-center gap-1.5 bg-[var(--brand)] text-white pl-3 pr-4 py-2 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-95 transition-all duration-200"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          บิลใหม่
+        </Link>
       </header>
 
       {sessions.length === 0 ? (
@@ -89,7 +85,7 @@ export default async function HomePage() {
             <li key={s.id} className="rise" style={{ animationDelay: `${Math.min(i * 40, 320)}ms` }}>
               <Link
                 href={`/session/${s.id}`}
-                className="group flex items-center justify-between bg-surface rounded-2xl border border-line px-4 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 transition-all duration-200"
+                className="group flex items-center justify-between bg-surface rounded-2xl border border-line px-4 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 card-lift"
               >
                 <div className="min-w-0">
                   <p className="font-semibold text-ink text-sm">

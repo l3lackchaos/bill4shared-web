@@ -90,7 +90,7 @@ export default async function SummaryPage({ params }: Props) {
           return (
             <li
               key={p.display_name}
-              className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden rise"
+              className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden rise card-lift"
               style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
             >
               <div className="flex justify-between items-center px-4 py-3.5">
@@ -154,11 +154,11 @@ export default async function SummaryPage({ params }: Props) {
       )}
 
       {/* Grand total — the hero figure of the page */}
-      <div className="rounded-2xl px-5 py-4 mb-7 flex justify-between items-center text-white bg-gradient-to-br from-[var(--brand)] to-[var(--brand-strong)] shadow-[var(--shadow-lg)]">
+      <div className="rounded-2xl px-5 py-4 mb-7 flex justify-between items-center text-white bg-gradient-to-br from-[var(--brand)] to-[var(--brand-strong)] glow-brand">
         <span className="text-sm font-medium opacity-90">
           {result.thai_help_amount > 0 ? 'กลุ่มจ่ายจริง' : 'รวมทั้งหมด'}
         </span>
-        <span className="tnum text-2xl font-extrabold">฿{result.net_payable.toFixed(2)}</span>
+        <span className="tnum text-3xl font-extrabold">฿{result.net_payable.toFixed(2)}</span>
       </div>
 
       <CopyButton
