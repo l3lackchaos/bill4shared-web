@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { BillSession } from '@/types'
 
@@ -36,21 +37,38 @@ function billLabel(s: BillSession): string {
 }
 
 export default function BillList({ sessions }: { sessions: BillSession[] }) {
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [page, setPage] = useState(1)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  // Locally hide rows already deleted this session so the list updates instantly.
+  const [removed, setRemoved] = useState<Set<string>>(new Set())
+
+  async function deleteBill(id: string) {
+    setDeletingId(id)
+    const res = await fetch(`/api/sessions/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setRemoved(prev => new Set(prev).add(id))
+      setConfirmId(null)
+      router.refresh() // re-sync from server in the background
+    }
+    setDeletingId(null)
+  }
 
   // Filter by status + free-text (date label or amount). Reset to page 1 whenever
   // the filter inputs change so the user never lands on an empty page.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return sessions.filter(s => {
+      if (removed.has(s.id)) return false
       if (status !== 'all' && s.status !== status) return false
       if (!q) return true
       const hay = `${billLabel(s)} ${s.grand_total}`.toLowerCase()
       return hay.includes(q)
     })
-  }, [sessions, query, status])
+  }, [sessions, query, status, removed])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
@@ -104,29 +122,59 @@ export default function BillList({ sessions }: { sessions: BillSession[] }) {
         <>
           <ul className="space-y-2.5 list-none p-0">
             {pageItems.map((s, i) => (
-              <li key={s.id} className="rise" style={{ animationDelay: `${Math.min(i * 35, 280)}ms` }}>
-                <Link
-                  href={`/session/${s.id}`}
-                  className="group flex items-center justify-between bg-surface rounded-2xl border border-line px-4 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 card-lift"
-                >
-                  <div className="min-w-0">
-                    <p className="font-semibold text-ink text-sm">{billLabel(s)}</p>
-                    <p className="flex items-center gap-1.5 text-xs text-ink-faint mt-0.5">
-                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT[s.status] ?? 'bg-gray-400'}`} aria-hidden="true" />
-                      {STATUS_LABEL[s.status] ?? s.status}
-                      <span className="text-line">·</span>
-                      {new Date(s.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+              <li key={s.id} className="rise relative group" style={{ animationDelay: `${Math.min(i * 35, 280)}ms` }}>
+                {confirmId === s.id ? (
+                  <div className="flex items-center justify-between bg-surface rounded-2xl border border-[var(--neg)]/40 px-4 py-3.5 shadow-[var(--shadow-sm)]">
+                    <span className="text-sm text-ink">ลบบิลนี้?</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => deleteBill(s.id)}
+                        disabled={deletingId === s.id}
+                        className="px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--neg)] text-white disabled:opacity-50 active:scale-95 transition-all"
+                      >
+                        {deletingId === s.id ? 'กำลังลบ...' : 'ลบ'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmId(null)}
+                        className="px-3 py-1.5 rounded-full text-xs font-medium text-ink-soft hover:text-ink"
+                      >
+                        ยกเลิก
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="tnum text-lg font-bold text-ink">
-                      {s.grand_total > 0 ? `฿${s.grand_total.toFixed(0)}` : '—'}
-                    </span>
-                    <svg className="w-4 h-4 text-ink-faint group-hover:text-[var(--brand)] group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </Link>
+                ) : (
+                  <>
+                    <Link
+                      href={`/session/${s.id}`}
+                      className="flex items-center justify-between bg-surface rounded-2xl border border-line pl-4 pr-12 py-3.5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:border-[var(--brand)]/30 card-lift"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-semibold text-ink text-sm">{billLabel(s)}</p>
+                        <p className="flex items-center gap-1.5 text-xs text-ink-faint mt-0.5">
+                          <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT[s.status] ?? 'bg-gray-400'}`} aria-hidden="true" />
+                          {STATUS_LABEL[s.status] ?? s.status}
+                          <span className="text-line">·</span>
+                          {new Date(s.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      <span className="tnum text-lg font-bold text-ink shrink-0">
+                        {s.grand_total > 0 ? `฿${s.grand_total.toFixed(0)}` : '—'}
+                      </span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmId(s.id)}
+                      aria-label={`ลบ ${billLabel(s)}`}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full text-ink-faint hover:text-[var(--neg)] hover:bg-[var(--neg)]/10 opacity-40 group-hover:opacity-100 focus:opacity-100 transition-all"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.87 12.14A2 2 0 0116.14 21H7.86a2 2 0 01-1.99-1.86L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </>
+                )}
               </li>
             ))}
           </ul>
