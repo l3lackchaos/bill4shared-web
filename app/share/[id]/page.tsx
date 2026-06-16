@@ -55,7 +55,7 @@ export default async function SharePage({ params }: Props) {
           return (
             <li
               key={p.display_name}
-              className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden rise"
+              className="bg-surface rounded-2xl border border-line shadow-[var(--shadow-sm)] overflow-hidden rise card-lift"
               style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
             >
               <div className="flex items-center gap-3 px-4 py-3.5">
@@ -111,7 +111,7 @@ export default async function SharePage({ params }: Props) {
         </div>
       )}
 
-      <div className="rounded-2xl px-5 py-4 mb-7 flex justify-between items-center text-white bg-gradient-to-br from-[var(--brand)] to-[var(--brand-strong)] glow-brand">
+      <div className="rounded-2xl px-5 py-4 mb-7 flex justify-between items-center text-white bg-[image:var(--brand-grad)] glow-brand">
         <span className="text-sm font-medium opacity-90">
           {result.thai_help_amount > 0 ? 'กลุ่มจ่ายจริง' : 'รวมทั้งหมด'}
         </span>

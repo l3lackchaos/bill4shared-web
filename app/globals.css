@@ -150,6 +150,11 @@ body {
   font-feature-settings: "tnum";
 }
 
+/* Even line breaks on headings (impeccable) */
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

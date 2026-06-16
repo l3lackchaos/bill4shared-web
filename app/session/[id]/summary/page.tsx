@@ -41,7 +41,9 @@ export default async function SummaryPage({ params }: Props) {
           </span>
         )}
       </div>
-      <p className="text-sm text-ink-faint mb-7">{MODE_LABEL[session.split_mode] ?? ''}</p>
+      <p className="text-sm text-ink-faint mb-7">
+        {result.persons.length} คน · {MODE_LABEL[session.split_mode] ?? ''}
+      </p>
 
       <ul className="space-y-3 mb-7 list-none p-0">
         {result.persons.map((p, idx) => {
@@ -114,7 +116,7 @@ export default async function SummaryPage({ params }: Props) {
       )}
 
       {/* Grand total — the hero figure of the page */}
-      <div className="rounded-2xl px-5 py-4 mb-7 flex justify-between items-center text-white bg-gradient-to-br from-[var(--brand)] to-[var(--brand-strong)] glow-brand">
+      <div className="rounded-2xl px-5 py-4 mb-7 flex justify-between items-center text-white bg-[image:var(--brand-grad)] glow-brand">
         <span className="text-sm font-medium opacity-90">
           {result.thai_help_amount > 0 ? 'กลุ่มจ่ายจริง' : 'รวมทั้งหมด'}
         </span>
@@ -150,7 +152,7 @@ export default async function SummaryPage({ params }: Props) {
         </Link>
         <Link
           href="/new"
-          className="flex-1 text-center bg-[var(--brand)] text-white py-2.5 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:bg-[var(--brand-strong)] active:scale-95 transition-all duration-200"
+          className="flex-1 text-center bg-[image:var(--brand-grad)] text-white py-2.5 rounded-full text-sm font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-95 transition-all duration-200"
         >
           บิลใหม่
         </Link>
