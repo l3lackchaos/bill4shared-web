@@ -7,17 +7,17 @@ import Link from 'next/link'
 export default function NewSessionPage() {
   const router = useRouter()
   const [splitMode, setSplitMode] = useState<1 | 2 | 3>(2)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<'upload' | 'manual' | null>(null)
 
-  async function create() {
-    setLoading(true)
+  async function create(destination: 'upload' | 'manual') {
+    setLoading(destination)
     const res = await fetch('/api/sessions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ split_mode: splitMode }),
     })
     const data = await res.json()
-    router.push(`/session/${data.id}/upload`)
+    router.push(`/session/${data.id}/${destination}`)
   }
 
   return (
@@ -73,11 +73,20 @@ export default function NewSessionPage() {
 
       <button
         type="button"
-        onClick={create}
-        disabled={loading}
+        onClick={() => create('upload')}
+        disabled={loading !== null}
         className="mt-7 w-full inline-flex items-center justify-center gap-2 bg-[image:var(--brand-grad)] text-white py-3 rounded-full font-semibold shadow-[var(--shadow-md)] hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 clay-press transition-all duration-200"
       >
-        {loading ? 'กำลังสร้าง...' : 'สร้างบิลและอัปโหลดรูป'}
+        {loading === 'upload' ? 'กำลังสร้าง...' : 'สร้างบิลและอัปโหลดรูป'}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => create('manual')}
+        disabled={loading !== null}
+        className="mt-3 w-full inline-flex items-center justify-center gap-2 bg-surface border-2 border-line text-ink py-3 rounded-full font-semibold hover:border-[var(--brand)] active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all duration-200"
+      >
+        {loading === 'manual' ? 'กำลังสร้าง...' : 'กรอกบิลเอง (ไม่ใช้รูป)'}
       </button>
     </div>
   )
