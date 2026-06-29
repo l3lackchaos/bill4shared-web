@@ -280,8 +280,10 @@ export default function ConfirmActions({
                 <input
                   type="number"
                   inputMode="decimal"
+                  min={0}
+                  max={THAI_HELP_CAP}
                   value={balance}
-                  onChange={e => setBalance(num(e.target.value))}
+                  onChange={e => setBalance(Math.min(num(e.target.value), THAI_HELP_CAP))}
                   placeholder="0"
                   className="w-24 text-right border border-line rounded px-2 py-1 bg-surface text-ink focus:outline-none focus:ring-1 focus:ring-[var(--warn)]"
                 />
