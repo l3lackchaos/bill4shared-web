@@ -144,6 +144,7 @@ export default async function ConfirmPage({ params }: Props) {
         foodSubtotal={Number(session.food_subtotal)}
         deliveryFee={Number(session.delivery_fee)}
         totalDiscount={Number(session.total_discount)}
+        foodDiscount={Number(session.food_discount ?? 0)}
         grandTotal={Number(session.grand_total)}
         splitMode={Number(session.split_mode)}
         thaiHelpEnabled={Boolean(session.thai_help_enabled)}

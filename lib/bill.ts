@@ -7,6 +7,7 @@ interface SessionData {
   food_subtotal: number
   delivery_fee: number
   total_discount: number
+  food_discount?: number // portion of total_discount on food (rest is on delivery)
   grand_total: number
   extra_charges?: ExtraCharge[]
   thai_help_enabled?: boolean
@@ -73,13 +74,15 @@ export function calculateSplit(
   const delivery_fee = round2(session.delivery_fee + extra.fees)
   const total_discount = round2(session.total_discount + extra.discounts)
 
-  // ไทยช่วยไทย: a SEPARATE layer from the shop discount. Its base is
-  // (food − discount) only — delivery is never subsidised. Apply the shop
-  // discount first, THEN compute the subsidy on that net-food figure:
-  //   subsidy = min(60% × (food − discount), ฿200, balance entered)
-  // The subsidy is spread per the split mode, EXACTLY like the shop discount:
-  // mode 1 & 2 by food ratio (%อาหาร), mode 3 equal per head.
-  const thaiHelpBase = Math.max(0, round2(foodSubtotal - total_discount))
+  // ไทยช่วยไทย: a SEPARATE layer from the shop discount. Its base is the food
+  // subtotal minus ONLY the food portion of the discount — a delivery discount
+  // must not shrink it (it applies to shipping, not food). Delivery itself is
+  // never subsidised:
+  //   subsidy = min(60% × (food − food_discount), ฿200, balance entered)
+  // Spread per split mode, like the shop discount: mode 1 & 2 by food ratio,
+  // mode 3 equal per head.
+  const foodDiscount = round2(Math.min(session.food_discount ?? 0, total_discount))
+  const thaiHelpBase = Math.max(0, round2(foodSubtotal - foodDiscount))
   const thaiHelp = session.thai_help_enabled
     ? computeThaiHelp(thaiHelpBase, session.thai_help_balance ?? 0)
     : 0

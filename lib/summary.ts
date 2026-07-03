@@ -51,6 +51,7 @@ export async function loadSummary(id: string): Promise<SummaryData | null> {
       food_subtotal: Number(session.food_subtotal),
       delivery_fee: Number(session.delivery_fee),
       total_discount: Number(session.total_discount),
+      food_discount: Number(session.food_discount ?? 0),
       grand_total: Number(session.grand_total),
       extra_charges: session.extra_charges ?? [],
       thai_help_enabled: Boolean(session.thai_help_enabled),

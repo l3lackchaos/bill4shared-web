@@ -37,6 +37,7 @@ export async function GET(_req: Request, { params }: Params) {
       food_subtotal: session.food_subtotal,
       delivery_fee: session.delivery_fee,
       total_discount: session.total_discount,
+      food_discount: Number(session.food_discount ?? 0),
       grand_total: session.grand_total,
       extra_charges: session.extra_charges ?? [],
       thai_help_enabled: Boolean(session.thai_help_enabled),

@@ -19,6 +19,7 @@ export default function ConfirmActions({
   foodSubtotal,
   deliveryFee,
   totalDiscount,
+  foodDiscount,
   grandTotal,
   splitMode,
   thaiHelpEnabled,
@@ -30,6 +31,7 @@ export default function ConfirmActions({
   foodSubtotal: number
   deliveryFee: number
   totalDiscount: number
+  foodDiscount: number
   grandTotal: number
   splitMode: number
   thaiHelpEnabled: boolean
@@ -41,6 +43,12 @@ export default function ConfirmActions({
 
   const [delivery, setDelivery] = useState(deliveryFee)
   const [discount, setDiscount] = useState(totalDiscount)
+  // Which part of the discount applies to food (vs delivery). Only the food part
+  // reduces the ไทยช่วยไทย base. Default: 'food' unless a saved food_discount
+  // says otherwise (0 while a discount exists → it was a delivery discount).
+  const [discountTarget, setDiscountTarget] = useState<'food' | 'delivery'>(
+    totalDiscount > 0 && foodDiscount === 0 ? 'delivery' : 'food',
+  )
   const [mode, setMode] = useState(splitMode || 2)
   // Custom extra charges (service charge, VAT, ค่าภาชนะ, extra discount, …)
   const [charges, setCharges] = useState<ExtraCharge[]>(extraCharges)
@@ -74,10 +82,12 @@ export default function ConfirmActions({
     setGrandOverride(null)
   }
 
-  // ไทยช่วยไทย base = (food − discount), excluding delivery. Subsidy =
-  // min(60% × base, ฿200 cap, balance entered). Keep this identical to
-  // calculateSplit() so the preview matches the summary exactly.
-  const thaiHelpBase = Math.max(0, Math.round((foodSubtotal - discount) * 100) / 100)
+  // Only the food part of the discount reduces the base. If the discount is
+  // tagged as a delivery discount, food_discount is 0.
+  const foodDiscountAmt = discountTarget === 'food' ? discount : 0
+  // ไทยช่วยไทย base = (food − food discount), excluding delivery. Subsidy =
+  // min(60% × base, ฿200 cap, balance). Keep identical to calculateSplit().
+  const thaiHelpBase = Math.max(0, Math.round((foodSubtotal - foodDiscountAmt) * 100) / 100)
   const subsidy = thaiHelp ? computeThaiHelp(thaiHelpBase, balance) : 0
   const netPayable = Math.round((grand - subsidy) * 100) / 100
 
@@ -106,6 +116,7 @@ export default function ConfirmActions({
     await patch({
       delivery_fee: delivery,
       total_discount: discount,
+      food_discount: foodDiscountAmt,
       grand_total: grand,
       split_mode: mode,
       extra_charges: cleanCharges,
@@ -153,7 +164,7 @@ export default function ConfirmActions({
           </div>
         </div>
 
-        <div className="flex justify-between items-center text-red-600">
+        <div className="flex justify-between items-center text-[var(--neg)]">
           <span>ส่วนลด</span>
           <div className="flex items-center gap-1">
             <span>-฿</span>
@@ -169,6 +180,28 @@ export default function ConfirmActions({
             />
           </div>
         </div>
+
+        {/* Which part of the discount is a food discount — only that reduces the
+            ไทยช่วยไทย base. Shown only when there's a discount and subsidy is on. */}
+        {discount > 0 && thaiHelp && (
+          <div className="flex justify-between items-center text-xs text-ink-faint">
+            <span>ส่วนลดนี้เป็นส่วนลด</span>
+            <div className="inline-flex rounded-lg border border-line p-0.5">
+              {(['food', 'delivery'] as const).map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setDiscountTarget(t)}
+                  className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                    discountTarget === t ? 'bg-[var(--brand)] text-white' : 'text-ink-soft hover:text-ink'
+                  }`}
+                >
+                  {t === 'food' ? 'ค่าอาหาร' : 'ค่าส่ง'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Custom extra charges / discounts */}
         {charges.map((c, i) => (

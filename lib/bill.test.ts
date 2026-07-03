@@ -153,6 +153,35 @@ test('thai help base is (food − discount), excludes delivery, splits by mode',
   assert.equal(by.B, 60)
 })
 
+test('thai help base subtracts only the food discount, not a delivery discount', () => {
+  const items = [item('a', 325, 1, [{ name: 'A' }])]
+  // food 325, total_discount 10 but it's a DELIVERY discount (food_discount 0)
+  // → base stays 325 → subsidy = 60% × 325 = 195
+  const r = calculateSplit(
+    {
+      ...base, split_mode: 2, food_subtotal: 325, delivery_fee: 47, total_discount: 10,
+      food_discount: 0, grand_total: 362,
+      thai_help_enabled: true, thai_help_balance: 10000,
+    },
+    items,
+  )
+  assert.equal(r.thai_help_amount, 195)
+})
+
+test('thai help base subtracts a food discount', () => {
+  const items = [item('a', 325, 1, [{ name: 'A' }])]
+  // same numbers but the 10 IS a food discount → base 315 → 60% = 189
+  const r = calculateSplit(
+    {
+      ...base, split_mode: 2, food_subtotal: 325, delivery_fee: 47, total_discount: 10,
+      food_discount: 10, grand_total: 362,
+      thai_help_enabled: true, thai_help_balance: 10000,
+    },
+    items,
+  )
+  assert.equal(r.thai_help_amount, 189)
+})
+
 test('thai help disabled → no subsidy', () => {
   const items = [item('a', 100, 1, [{ name: 'A' }])]
   const r = calculateSplit(

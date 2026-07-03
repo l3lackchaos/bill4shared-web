@@ -19,6 +19,7 @@ export interface BillSession {
   food_subtotal: number
   delivery_fee: number
   total_discount: number
+  food_discount: number // portion of total_discount that applies to food (the rest is on delivery); only this reduces the ไทยช่วยไทย base
   grand_total: number
   extra_charges: ExtraCharge[]
   thai_help_enabled: boolean

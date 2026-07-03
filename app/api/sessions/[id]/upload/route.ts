@@ -45,12 +45,15 @@ export async function POST(req: Request, { params }: Params) {
 
   const db = createServerClient()
 
-  // Update session with parsed totals and raw OCR data
+  // Update session with parsed totals and raw OCR data. Default food_discount to
+  // the whole discount (most receipt discounts are food discounts); the user can
+  // re-tag it as a delivery discount on the confirm step.
   await db.from('sessions').update({
     bill_type: bill.bill_type,
     food_subtotal: bill.food_subtotal,
     delivery_fee: bill.delivery_fee,
     total_discount: bill.total_discount,
+    food_discount: bill.total_discount,
     grand_total: bill.grand_total,
     ocr_raw: bill,
     status: 'confirming',
