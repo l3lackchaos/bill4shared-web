@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { computeThaiHelp } from '@/lib/bill'
 import { THAI_HELP_RATE, THAI_HELP_CAP } from '@/types'
@@ -25,6 +25,7 @@ export default function ConfirmActions({
   thaiHelpEnabled,
   thaiHelpBalance,
   extraCharges,
+  items,
 }: {
   sessionId: string
   billType: string
@@ -37,6 +38,7 @@ export default function ConfirmActions({
   thaiHelpEnabled: boolean
   thaiHelpBalance: number
   extraCharges: ExtraCharge[]
+  items: { id: string; unit_price: number; quantity: number }[]
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -68,6 +70,18 @@ export default function ConfirmActions({
 
   const computedGrand = Math.round((foodSubtotal + delivery - discount + extraFees - extraDiscounts) * 100) / 100
   const grand = grandOverride ?? computedGrand
+
+  // When the user edits item prices upstream, foodSubtotal changes — drop any
+  // manual grand-total override so the total re-syncs to the new subtotal. Skip
+  // the first render so a legitimately parsed override (OCR grand ≠ Σ) survives.
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return
+    }
+    setGrandOverride(null)
+  }, [foodSubtotal])
 
   function addCharge(kind: ExtraCharge['kind']) {
     setCharges(prev => [...prev, { label: '', amount: 0, kind }])
@@ -113,7 +127,19 @@ export default function ConfirmActions({
       .filter(c => c.label.trim() !== '' || Number(c.amount) > 0)
       .map(c => ({ label: c.label.trim() || (c.kind === 'fee' ? 'ค่าบริการ' : 'ส่วนลด'), amount: Math.abs(Number(c.amount) || 0), kind: c.kind }))
 
+    // Save edited item prices / quantities first. This also re-syncs the
+    // session's food_subtotal server-side; we resend it below so grand_total
+    // stays consistent with what the user saw.
+    await fetch(`/api/sessions/${sessionId}/items`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: items.map(i => ({ id: i.id, unit_price: i.unit_price, quantity: i.quantity })),
+      }),
+    })
+
     await patch({
+      food_subtotal: foodSubtotal,
       delivery_fee: delivery,
       total_discount: discount,
       food_discount: foodDiscountAmt,
